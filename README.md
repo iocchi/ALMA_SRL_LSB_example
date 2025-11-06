@@ -9,7 +9,7 @@ E' possibile eseguire il sistema in due diverse modalità:
 ## Docker container 
 Eseguire i container docker con:  
 ./run-containers.sh
-## Requirements
+## Virtual Environment
 Il file requirements.txt contiene tutte le installazioni necessarie per il funzionamento del programma.  
 Si consiglia l'uso di un virtual envoronment per poi procedere all'installazione usando:  
 pip install -r requirements.txt  
