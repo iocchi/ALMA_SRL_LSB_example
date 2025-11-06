@@ -7,7 +7,7 @@ E' possibile eseguire il sistema in due diverse modalità:
  * Virtual environment
 
 ## Docker container 
-run the docker container with  
+Eseguire i container docker con:  
 ./run-containers.sh
 ## Requirements
 Il file requirements.txt contiene tutte le installazioni necessarie per il funzionamento del programma.  
