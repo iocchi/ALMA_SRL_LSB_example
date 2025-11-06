@@ -5,10 +5,24 @@ services:
     build: ./srl_service
     container_name: stub_server
     ports:
-      - "8000:8000"         # Map local port 8000 → container port 8000
+      - "8000:8000"              # FastAPI exposed on localhost:8000
     volumes:
-      - ./srl_service:/app             # Mount current folder for live code updates (dev only)
+      - ./srl_service:/app       # Mount code for live reload (dev)
     environment:
-      - PYTHONUNBUFFERED=1  # Ensures logs show up immediately in the console
+      - PYTHONUNBUFFERED=1
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    # The --reload flag restarts the server automatically on code changes
+
+  lsb:
+    build: ./lsb
+    container_name: lsb_client
+    privileged: true
+    volumes:
+      - ./lsb:/app
+      - /etc/wireguard:/etc/wireguard
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+    - "5000:5000"       #
+    # Uncomment if you need VPN-level networking access
+    # network_mode: "host"
+

@@ -1,7 +1,7 @@
 # Use Alpine Python image
 FROM python:3.11-alpine
 
-# Install packages: Python deps, bash, coreutils, ttyd, WireGuard
+# Install system packages
 RUN apk add --no-cache \
     bash \
     coreutils \
@@ -15,20 +15,20 @@ RUN apk add --no-cache \
     musl-dev \
     linux-headers
 
-# Create workdir
+# Create working directory
 WORKDIR /app
 
-# Copy all files: Python code and VPN config
+# Copy code into container
 COPY . .
 
 # Install Python dependencies
-RUN pip install flask flask-socketio eventlet psutil
+RUN pip install --no-cache-dir flask flask-socketio eventlet psutil
 
-# Allow executing scripts
-RUN chmod +x /app/register.sh /app/src/main.py
-
-# make sure wireguard folder exists
+# Ensure WireGuard folder exists
 RUN mkdir -p /etc/wireguard
 
-# Entrypoint: bring up VPN then run python app
-ENTRYPOINT ["/bin/bash", "-c", "sleep 6 && /app/register.sh --client lsb4 && python /app/src/main.py"]
+EXPOSE 5000
+
+
+# Run your main.py directly
+ENTRYPOINT ["python", "/app/main.py"]
