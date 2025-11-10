@@ -28,6 +28,14 @@ HTML_PAGE = """
 <body>
     <h1>🔬 Real-Time Experiment Dashboard</h1>
 
+    <div id="user-data" style="text-align: center; margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 8px;">
+        <div id="user-info">Loading user data...</div>
+        <button id="disconnect-btn" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
+            🔌 Disconnect from Lab
+        </button>
+        <div id="disconnect-message" style="margin-top: 10px;"></div>
+    </div>
+
     <div class="slider-container">
         <label for="amplitude">Amplitude: </label>
         <input type="range" id="amplitude" min="0" max="5" step="0.1" value="1">
@@ -40,7 +48,219 @@ HTML_PAGE = """
         <div class="chart-box"><div id="pie-chart"></div></div>
     </div>
 
+    <div id="waiting-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin-bottom: 15px;">👥 Users Waiting to Enter the Lab</h3>
+        <div id="waiting-users-list">Loading waiting users...</div>
+    </div>
+
+    <div id="inlab-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin-bottom: 15px;">✅ Users Currently in the Lab</h3>
+        <div id="inlab-users-list">Loading users in lab...</div>
+    </div>
+
+    <div id="bookings-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin-bottom: 15px;">📅 Current Lab Bookings</h3>
+        <div id="bookings-list">Loading bookings...</div>
+    </div>
+
     <script>
+        // Fetch user data from SRL service
+        async function fetchUserData() {
+            try {
+                const vpnId = 123; // You can change this or make it dynamic
+                const response = await fetch(`http://localhost:8000/user_data?vpn_id=${vpnId}`);
+                const data = await response.json();
+                
+                if (data.message) {
+                    const userData = data.message;
+                    const userInfoDiv = document.getElementById('user-info');
+                    userInfoDiv.innerHTML = `
+                        <h2 style="margin: 10px 0;">Welcome back, ${userData.first_name} ${userData.last_name}!</h2>
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
+                            <span><strong>Email:</strong> ${userData.email}</span>
+                            <span><strong>Matricola:</strong> ${userData.matricola}</span>
+                            <span><strong>Role:</strong> ${userData.role}</span>
+                            <span><strong>Status:</strong> ${userData.status}</span>
+                            <span><strong>You accessed the lab at:</strong> ${userData.LabAccessTime}</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                document.getElementById('user-info').innerHTML = '<p style="color: red;">Error loading user data</p>';
+            }
+        }
+
+        // Fetch waiting users from SRL service
+        async function fetchWaitingUsers() {
+            try {
+                const response = await fetch('http://localhost:8000/waiting_users');
+                const data = await response.json();
+                
+                if (data.waiting_users) {
+                    const users = data.waiting_users;
+                    const waitingListDiv = document.getElementById('waiting-users-list');
+                    
+                    if (users.length === 0) {
+                        waitingListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No users waiting</p>';
+                    } else {
+                        let listHTML = '<ul style="list-style: none; padding: 0;">';
+                        users.forEach(user => {
+                            listHTML += `
+                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                        <span style="font-weight: bold; font-size: 1.1em;">${user.first_name} ${user.last_name}</span>
+                                        <span style="color: #6c757d;">Matricola: ${user.matricola}</span>
+                                        <span style="color: #6c757d;">Email: ${user.email}</span>
+                                        <span style="color: #6c757d;">Role: ${user.role}</span>
+                                        <span style="color: #dc3545; font-size: 0.9em;">⏰ Waiting since: ${user.waiting_since}</span>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                        listHTML += '</ul>';
+                        waitingListDiv.innerHTML = listHTML;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching waiting users:', error);
+                document.getElementById('waiting-users-list').innerHTML = '<p style="color: red; text-align: center;">Error loading waiting users</p>';
+            }
+        }
+
+        // Fetch in-lab users from SRL service
+        async function fetchInLabUsers() {
+            try {
+                const response = await fetch('http://localhost:8000/inlab_users');
+                const data = await response.json();
+                
+                if (data.waiting_users) {
+                    const users = data.waiting_users;
+                    const inlabListDiv = document.getElementById('inlab-users-list');
+                    
+                    if (users.length === 0) {
+                        inlabListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No users in lab</p>';
+                    } else {
+                        let listHTML = '<ul style="list-style: none; padding: 0;">';
+                        users.forEach(user => {
+                            listHTML += `
+                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid #28a745; border-radius: 4px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                        <span style="font-weight: bold; font-size: 1.1em;">${user.first_name} ${user.last_name}</span>
+                                        <span style="color: #6c757d;">Matricola: ${user.matricola}</span>
+                                        <span style="color: #6c757d;">Email: ${user.email}</span>
+                                        <span style="color: #6c757d;">Role: ${user.role}</span>
+                                        <span style="color: #6c757d;">VPN ID: ${user.vpn_id}</span>
+                                        <span style="color: #28a745; font-size: 0.9em;">🚪 Accessed at: ${user.access_at}</span>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                        listHTML += '</ul>';
+                        inlabListDiv.innerHTML = listHTML;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching in-lab users:', error);
+                document.getElementById('inlab-users-list').innerHTML = '<p style="color: red; text-align: center;">Error loading in-lab users</p>';
+            }
+        }
+
+        // Fetch bookings from SRL service
+        async function fetchBookings() {
+            try {
+                const response = await fetch('http://localhost:8000/bookings');
+                const data = await response.json();
+                
+                if (data.current_bookings) {
+                    const bookings = data.current_bookings;
+                    const bookingsListDiv = document.getElementById('bookings-list');
+                    
+                    if (bookings.length === 0) {
+                        bookingsListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No bookings available</p>';
+                    } else {
+                        let listHTML = '<ul style="list-style: none; padding: 0;">';
+                        bookings.forEach(booking => {
+                            listHTML += `
+                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                        <span style="font-weight: bold; font-size: 1.1em;">${booking.first_name} ${booking.last_name}</span>
+                                        <span style="color: #6c757d;">Email: ${booking.email}</span>
+                                        <span style="color: #6c757d;">Role: ${booking.role}</span>
+                                        <span style="color: #ffc107; font-size: 0.9em;">📅 Time Slot: ${booking.time_slot}</span>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                        listHTML += '</ul>';
+                        bookingsListDiv.innerHTML = listHTML;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching bookings:', error);
+                document.getElementById('bookings-list').innerHTML = '<p style="color: red; text-align: center;">Error loading bookings</p>';
+            }
+        }
+
+        // Handle disconnect button
+        async function disconnectFromLab() {
+            try {
+                const vpnId = 123; // Should match the VPN ID used in fetchUserData
+                const disconnectBtn = document.getElementById('disconnect-btn');
+                const messageDiv = document.getElementById('disconnect-message');
+                
+                // Disable the button
+                disconnectBtn.disabled = true;
+                disconnectBtn.style.background = '#6c757d';
+                disconnectBtn.style.cursor = 'not-allowed';
+                
+                const response = await fetch(`http://localhost:8000/close_connection?vpn_id=${vpnId}`);
+                const data = await response.json();
+                
+                console.log('API Response:', data); // Log the full response
+                
+                if (data.release_lsb) {
+                    console.log('Disconnect message:', data.release_lsb); // Log the message
+                    messageDiv.innerHTML = `<p style="color: #28a745; font-weight: bold;">✅ ${data.release_lsb}</p>`;
+                } else {
+                    console.warn('No release_lsb message in response');
+                    messageDiv.innerHTML = '<p style="color: #ffc107; font-weight: bold;">⚠️ Disconnected but no message received</p>';
+                }
+                
+                // Re-enable the button and clear message after 10 seconds
+                setTimeout(() => {
+                    disconnectBtn.disabled = false;
+                    disconnectBtn.style.background = '#dc3545';
+                    disconnectBtn.style.cursor = 'pointer';
+                    messageDiv.innerHTML = '';
+                }, 5000);
+                
+            } catch (error) {
+                console.error('Error disconnecting:', error);
+                const messageDiv = document.getElementById('disconnect-message');
+                const disconnectBtn = document.getElementById('disconnect-btn');
+                
+                messageDiv.innerHTML = '<p style="color: red; font-weight: bold;">❌ Error disconnecting from lab</p>';
+                
+                // Re-enable the button and clear message after 10 seconds even on error
+                setTimeout(() => {
+                    disconnectBtn.disabled = false;
+                    disconnectBtn.style.background = '#dc3545';
+                    disconnectBtn.style.cursor = 'pointer';
+                    messageDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Add event listener to disconnect button
+        document.getElementById('disconnect-btn').addEventListener('click', disconnectFromLab);
+
+        // Fetch user data when page loads
+        fetchUserData();
+        fetchWaitingUsers();
+        fetchInLabUsers();
+        fetchBookings();
+
         const socket = io();
         const ampSlider = document.getElementById('amplitude');
         const ampValue = document.getElementById('amp-value');

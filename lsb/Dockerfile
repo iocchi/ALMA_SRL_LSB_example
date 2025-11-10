@@ -18,11 +18,14 @@ RUN apk add --no-cache \
 # Create working directory
 WORKDIR /app
 
-# Copy code into container
-COPY . .
+# Copy requirements first for better caching
+COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir flask flask-socketio eventlet psutil
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy code into container
+COPY . .
 
 # Ensure WireGuard folder exists
 RUN mkdir -p /etc/wireguard

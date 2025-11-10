@@ -4,12 +4,14 @@ FROM python:3.12-slim
 # Set the working directory inside the container
 WORKDIR /app
 
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Copy all files from the current directory to the container's working directory
-
 COPY . .
-
-# Install FastAPI and Uvicorn (the ASGI server)
-RUN pip install --no-cache-dir fastapi uvicorn
 
 # Expose port 8000 so it can be accessed from outside the container
 EXPOSE 8000

@@ -1,8 +1,18 @@
 # file: main.py
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 @app.get("/user_data")
 async def get_user(vpn_id: int):
@@ -112,8 +122,8 @@ async def inlab_users():
 
 
 
-@app.get("/close_lsb")
-async def close_lsb(vpn_id: int):
+@app.get("/close_connection")
+async def close_connection(vpn_id: int):
     """
     Notifies SRL that the connection with the LSB has being closed by the user.
 
@@ -122,7 +132,7 @@ async def close_lsb(vpn_id: int):
     try:
         if vpn_id <= 0:
             raise ValueError("Invalid VPN ID")
-        return {"release_lsb": "Successfully closed connection with SRL for " + vpn_id}
+        return {"release_lsb": "Successfully closed connection with SRL"}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
