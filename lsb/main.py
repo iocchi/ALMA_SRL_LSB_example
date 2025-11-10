@@ -11,8 +11,10 @@ import argparse
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Global variable for SRL service URL
+# Global variable for SRL service URL (used by server-side if needed)
 SRL_SERVICE_URL = "http://localhost:8000"
+# URL for browser-side requests (must use localhost, not Docker service name)
+SRL_SERVICE_URL_BROWSER = "http://localhost:8000"
 
 HTML_PAGE = """
 <!DOCTYPE html>
@@ -301,7 +303,7 @@ amplitude = 1.0
 
 @app.route("/")
 def index():
-    return render_template_string(HTML_PAGE, srl_url=SRL_SERVICE_URL)
+    return render_template_string(HTML_PAGE, srl_url=SRL_SERVICE_URL_BROWSER)
 
 @socketio.on('set_amplitude')
 def set_amplitude(value):
@@ -323,11 +325,14 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=5000, help='Port to bind the LSB service (default: 5000)')
     parser.add_argument('--srl-host', type=str, default='localhost', help='Host of the SRL service (default: localhost)')
     parser.add_argument('--srl-port', type=int, default=8000, help='Port of the SRL service (default: 8000)')
+    parser.add_argument('--srl-browser-host', type=str, default='localhost', help='Host of the SRL service for browser requests (default: localhost)')
     args = parser.parse_args()
     
     SRL_SERVICE_URL = f"http://{args.srl_host}:{args.srl_port}"
+    SRL_SERVICE_URL_BROWSER = f"http://{args.srl_browser_host}:{args.srl_port}"
     
     print(f"🚀 Live dashboard running at http://{args.host}:{args.port}")
     print(f"🔗 Connecting to SRL service at {SRL_SERVICE_URL}")
+    print(f"🌐 Browser will connect to SRL service at {SRL_SERVICE_URL_BROWSER}")
     socketio.start_background_task(emit_experiment_data)
     socketio.run(app, host=args.host, port=args.port)
