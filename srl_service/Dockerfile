@@ -16,7 +16,5 @@ COPY . .
 # Expose port 8000 so it can be accessed from outside the container
 EXPOSE 8000
 
-# Command to start the FastAPI app using Uvicorn
-# --host 0.0.0.0 allows access from external machines
-# --port 8000 defines the port to listen on
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command (can be overridden by docker-compose)
+CMD ["python", "main.py", "--host", "0.0.0.0", "--port", "8000"]

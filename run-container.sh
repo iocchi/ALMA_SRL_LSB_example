@@ -1,18 +1,25 @@
 #!/bin/bash
 
-# manage.sh — Build and run FastAPI container in foreground mode
+# run-container.sh — Build and run services with configurable ports
 # You can stop it anytime with CTRL+C
 
 set -e  # Exit immediately on errors
 
-SERVICE_NAME="fastapi"
-PORT=8000
+# Default values (can be overridden by environment variables)
+export SRL_PORT=${SRL_PORT:-8000}
+export LSB_PORT=${LSB_PORT:-5000}
+export SRL_CONNECT_HOST=${SRL_CONNECT_HOST:-srl_service}
+export SRL_CONNECT_PORT=${SRL_CONNECT_PORT:-8000}
 
-echo "🔨 Building Docker image..."
+echo "🔨 Building Docker images..."
 docker compose build
 
-echo "🚀 Starting FastAPI (press CTRL+C to stop)..."
-echo "🌐 Open your browser at: http://127.0.0.1:${PORT}/docs"
+echo "🚀 Starting services with configuration:"
+echo "   - SRL Service: http://localhost:${SRL_PORT}"
+echo "   - LSB Service: http://localhost:${LSB_PORT}"
+echo "   - LSB connecting to SRL at: ${SRL_CONNECT_HOST}:${SRL_CONNECT_PORT}"
+echo ""
+echo "Press CTRL+C to stop"
 echo
 
 # Run container in foreground so logs are visible

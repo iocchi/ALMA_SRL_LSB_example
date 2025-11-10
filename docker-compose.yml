@@ -5,12 +5,12 @@ services:
     build: ./srl_service
     container_name: srl_service
     ports:
-      - "8000:8000"              # FastAPI exposed on localhost:8000
+      - "${SRL_PORT:-8000}:8000"              # FastAPI exposed on localhost:8000
     volumes:
       - ./srl_service:/app       # Mount code for live reload (dev)
     environment:
       - PYTHONUNBUFFERED=1
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: python main.py --host 0.0.0.0 --port 8000
 
   lsb_service:
     build: ./lsb
@@ -22,7 +22,10 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     ports:
-    - "5000:5000"       #
+    - "${LSB_PORT:-5000}:5000"       #
+    depends_on:
+      - srl_service
+    command: python /app/main.py --host 0.0.0.0 --port 5000 --srl-host ${SRL_CONNECT_HOST:-srl_service} --srl-port ${SRL_CONNECT_PORT:-8000}
     # Uncomment if you need VPN-level networking access
     # network_mode: "host"
 

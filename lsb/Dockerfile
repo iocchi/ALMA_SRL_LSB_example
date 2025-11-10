@@ -32,6 +32,5 @@ RUN mkdir -p /etc/wireguard
 
 EXPOSE 5000
 
-
-# Run your main.py directly
-ENTRYPOINT ["python", "/app/main.py"]
+# Default command (can be overridden by docker-compose)
+CMD ["python", "/app/main.py", "--host", "0.0.0.0", "--port", "5000", "--srl-host", "srl_service", "--srl-port", "8000"]
