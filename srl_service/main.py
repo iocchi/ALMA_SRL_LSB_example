@@ -2,6 +2,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import argparse
+import uvicorn
 
 app = FastAPI()
 
@@ -173,3 +175,12 @@ async def bookings():
         # Catch-all for unexpected errors
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='SRL Service')
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind the SRL service (default: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=8000, help='Port to bind the SRL service (default: 8000)')
+    args = parser.parse_args()
+    
+    print(f"🚀 SRL service running at http://{args.host}:{args.port}")
+    uvicorn.run(app, host=args.host, port=args.port)

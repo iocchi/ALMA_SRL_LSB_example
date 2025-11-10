@@ -6,9 +6,13 @@ from flask_socketio import SocketIO
 import math
 import random
 import time
+import argparse
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+# Global variable for SRL service URL
+SRL_SERVICE_URL = "http://localhost:8000"
 
 HTML_PAGE = """
 <!DOCTYPE html>
@@ -64,11 +68,13 @@ HTML_PAGE = """
     </div>
 
     <script>
+        const SRL_SERVICE_URL = "{{ srl_url }}";
+        
         // Fetch user data from SRL service
         async function fetchUserData() {
             try {
                 const vpnId = 123; // You can change this or make it dynamic
-                const response = await fetch(`http://localhost:8000/user_data?vpn_id=${vpnId}`);
+                const response = await fetch(`${SRL_SERVICE_URL}/user_data?vpn_id=${vpnId}`);
                 const data = await response.json();
                 
                 if (data.message) {
@@ -94,7 +100,7 @@ HTML_PAGE = """
         // Fetch waiting users from SRL service
         async function fetchWaitingUsers() {
             try {
-                const response = await fetch('http://localhost:8000/waiting_users');
+                const response = await fetch(`${SRL_SERVICE_URL}/waiting_users`);
                 const data = await response.json();
                 
                 if (data.waiting_users) {
@@ -131,7 +137,7 @@ HTML_PAGE = """
         // Fetch in-lab users from SRL service
         async function fetchInLabUsers() {
             try {
-                const response = await fetch('http://localhost:8000/inlab_users');
+                const response = await fetch(`${SRL_SERVICE_URL}/inlab_users`);
                 const data = await response.json();
                 
                 if (data.waiting_users) {
@@ -169,7 +175,7 @@ HTML_PAGE = """
         // Fetch bookings from SRL service
         async function fetchBookings() {
             try {
-                const response = await fetch('http://localhost:8000/bookings');
+                const response = await fetch(`${SRL_SERVICE_URL}/bookings`);
                 const data = await response.json();
                 
                 if (data.current_bookings) {
@@ -214,7 +220,7 @@ HTML_PAGE = """
                 disconnectBtn.style.background = '#6c757d';
                 disconnectBtn.style.cursor = 'not-allowed';
                 
-                const response = await fetch(`http://localhost:8000/close_connection?vpn_id=${vpnId}`);
+                const response = await fetch(`${SRL_SERVICE_URL}/close_connection?vpn_id=${vpnId}`);
                 const data = await response.json();
                 
                 console.log('API Response:', data); // Log the full response
@@ -295,7 +301,7 @@ amplitude = 1.0
 
 @app.route("/")
 def index():
-    return render_template_string(HTML_PAGE)
+    return render_template_string(HTML_PAGE, srl_url=SRL_SERVICE_URL)
 
 @socketio.on('set_amplitude')
 def set_amplitude(value):
@@ -312,6 +318,16 @@ def emit_experiment_data():
         time.sleep(0.5)
 
 if __name__ == "__main__":
-    print("🚀 Live dashboard running at http://127.0.0.1:5000")
+    parser = argparse.ArgumentParser(description='LSB Service')
+    parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to bind the LSB service (default: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=5000, help='Port to bind the LSB service (default: 5000)')
+    parser.add_argument('--srl-host', type=str, default='localhost', help='Host of the SRL service (default: localhost)')
+    parser.add_argument('--srl-port', type=int, default=8000, help='Port of the SRL service (default: 8000)')
+    args = parser.parse_args()
+    
+    SRL_SERVICE_URL = f"http://{args.srl_host}:{args.srl_port}"
+    
+    print(f"🚀 Live dashboard running at http://{args.host}:{args.port}")
+    print(f"🔗 Connecting to SRL service at {SRL_SERVICE_URL}")
     socketio.start_background_task(emit_experiment_data)
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host=args.host, port=args.port)

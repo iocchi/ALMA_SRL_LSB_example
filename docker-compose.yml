@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  fastapi:
+  srl_service:
     build: ./srl_service
-    container_name: stub_server
+    container_name: srl_service
     ports:
       - "8000:8000"              # FastAPI exposed on localhost:8000
     volumes:
@@ -12,9 +12,9 @@ services:
       - PYTHONUNBUFFERED=1
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  lsb:
+  lsb_service:
     build: ./lsb
-    container_name: lsb_client
+    container_name: lsb_service
     privileged: true
     volumes:
       - ./lsb:/app

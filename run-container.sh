@@ -16,4 +16,4 @@ echo "🌐 Open your browser at: http://127.0.0.1:${PORT}/docs"
 echo
 
 # Run container in foreground so logs are visible
-docker compose up
+docker compose up $1
