@@ -29,3 +29,15 @@ services:
     # Uncomment if you need VPN-level networking access
     # network_mode: "host"
 
+  lsb_static:
+    image: python:3.12-slim
+    container_name: lsb_static
+    working_dir: /app
+    volumes:
+      - ./lsb:/app
+    ports:
+      - "${LSB_STATIC_PORT:-8080}:8080"
+    depends_on:
+      - srl_service
+    command: python -m http.server 8080
+
