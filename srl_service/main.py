@@ -31,12 +31,11 @@ HTML_PAGE = """
 <body>
     <h1>Servizi SRL di prova</h1>
     
-    <code>/user_data?vpn_ip=....</code>: dati dell'utente connesso con VPN IP specificato <br>
-    
-    <code>/close_connection?vpn_ip=...`</code>: segnale di chiusura della connessione dell'utente con VPN IP specificato
-- `/inlab_users`: lista degli utenti attualmente nel Lab
-- `/waiting_users`: lista degli utenti in attesa di entrare in Lab
-- `/bookings`: lista delle prenotazioni del Lab
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/user_data?vpn_ip=....</code> </span>: dati dell'utente connesso con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/close_connection?vpn_ip=...</code> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/inlab_users</code> </span>: lista degli utenti attualmente nel Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/waiting_users</code> </span>: lista degli utenti in attesa di entrare in Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/bookings</code> </span>: lista delle prenotazioni del Lab </p>
 
 </body>
 </html>

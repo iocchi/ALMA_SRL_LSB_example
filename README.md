@@ -22,7 +22,7 @@ Esempi:
 
     http://151.100.59.107:9890/user_data?vpn_ip=10.0.1.100
     
-    {"message": 
+    {"user_data": 
       {
         "vpn_ip":"10.0.1.100",
         "matricola":"1111234",
@@ -42,8 +42,11 @@ Esempi:
 
     http://151.100.59.107:9890/close_connection?vpn_ip=10.0.1.100
 
-    {
-      "release_lsb": "Successfully closed connection with SRL" 
+    {"close_connection":
+      {
+        "status":"success",
+        "vpn_ip":"10.0.1.100"
+      }
     }
 
 
