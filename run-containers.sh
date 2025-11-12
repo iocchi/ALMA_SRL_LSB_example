@@ -15,7 +15,7 @@ echo "🔨 Building Docker images..."
 docker compose build
 
 echo "🚀 Starting services with configuration:"
-echo "   - SRL Service: http://localhost:${SRL_PORT}"
+echo "   - SRL Service: http://localhost:${SRL_PORT}/<service_name>"
 echo "   - LSB Service: http://localhost:${LSB_PORT}"
 echo "   - LSB connecting to SRL at: ${SRL_CONNECT_HOST}:${SRL_CONNECT_PORT}"
 echo ""
@@ -24,3 +24,4 @@ echo
 
 # Run container in foreground so logs are visible
 docker compose up $1
+

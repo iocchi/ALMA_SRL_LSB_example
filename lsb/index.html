@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LSB HTML/JS</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f8f9fa; }
+        h1 { text-align: center; }
+        .charts { display: flex; flex-wrap: wrap; justify-content: space-around; }
+        .chart-box { width: 45%; min-width: 300px; margin: 20px 0; }
+        .slider-container { text-align: center; margin: 20px 0; }
+        .card { margin: 10px 0; padding: 12px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+    <h1>🔬 Dashboard Esperimento LSB di prova</h1>
+
+    <div id="user-data" class="card" style="text-align: center;">
+        <div id="user-info">Loading user data...</div>
+        <button id="disconnect-btn" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
+            🔌 Esci dal Lab
+        </button>
+        <div id="disconnect-message" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="slider-container card">
+        <label for="amplitude">Amplitude: </label>
+        <input type="range" id="amplitude" min="0" max="5" step="0.1" value="1">
+        <span id="amp-value">1</span>
+    </div>
+
+    <div class="charts">
+        <div class="chart-box card"><div id="line-plot"></div></div>
+        <div class="chart-box card"><div id="bar-plot"></div></div>
+        <div class="chart-box card"><div id="pie-chart"></div></div>
+    </div>
+
+    <div id="waiting-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
+        <h3 style="text-align: center; margin-bottom: 10px;">👥 Utenti in attesa di entrare nel Lab</h3>
+        <div id="waiting-users-list">Loading waiting users...</div>
+    </div>
+
+    <div id="inlab-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
+        <h3 style="text-align: center; margin-bottom: 10px;">✅ Utenti nel Lab</h3>
+        <div id="inlab-users-list">Loading users in lab...</div>
+    </div>
+
+    <div id="bookings-section" class="card" style="margin: 20px auto; max-width: 900px;">
+        <h3 style="text-align: center; margin-bottom: 10px;">📅 Prenotazioni del Lab </h3>
+        <div id="bookings-list">Loading bookings...</div>
+    </div>
+
+    <script>
+        // Browser-facing SRL service base URL (static file should use localhost)
+
+
+        const SRL_SERVICE_URL = 'http://151.100.59.107:8000';   // 'http://localhost:8000';
+
+        async function safeFetchJSON(url) {
+            try {
+                const r = await fetch(url, { mode: 'cors' });
+                return await r.json();
+            } catch (e) {
+                console.error('fetch error', url, e);
+                return null;
+            }
+        }
+
+        async function fetchUserData() {
+            const vpnId = 123;
+            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/user_data?vpn_id=${vpnId}`);
+            const userInfoDiv = document.getElementById('user-info');
+            if (!data || !data.message) {
+                userInfoDiv.innerHTML = '<p style="color: #6c757d;">No user data available</p>';
+                return;
+            }
+            const userData = data.message;
+            userInfoDiv.innerHTML = `
+                <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;"> 
+                    <span><strong>Email:</strong> ${userData.email}</span>
+                    <span><strong>Matricola:</strong> ${userData.matricola}</span>
+                    <span><strong>Role:</strong> ${userData.role}</span>
+                    <span><strong>Status:</strong> ${userData.status}</span>
+                    <span><strong>Sei entrato nel Lab alle:</strong> ${userData.LabAccessTime}</span>
+                </div>
+            `;
+        }
+
+        async function fetchWaitingUsers() {
+            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/waiting_users`);
+            const div = document.getElementById('waiting-users-list');
+            if (!data || !data.waiting_users) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No waiting users</p>'; return; }
+            const users = data.waiting_users;
+            if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users waiting</p>'; return; }
+            let html = '<ul style="list-style:none;padding:0;">';
+            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #007bff;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} <br> In attesa da: ${u.waiting_since} </li>` });
+            html += '</ul>';
+            div.innerHTML = html;
+        }
+
+        async function fetchInLabUsers() {
+            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/inlab_users`);
+            const div = document.getElementById('inlab-users-list');
+            if (!data || !data.waiting_users) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
+            const users = data.waiting_users;
+            if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
+            let html = '<ul style="list-style:none;padding:0;">';
+            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #28a745;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} &nbsp;&nbsp; VPN IP: ${u.vpn_id || ''} <br> In lab da: ${u.access_at}</li>` });
+            html += '</ul>';
+            div.innerHTML = html;
+        }
+
+        async function fetchBookings() {
+            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/bookings`);
+            const div = document.getElementById('bookings-list');
+            if (!data || !data.current_bookings) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
+            const bookings = data.current_bookings;
+            if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
+            let html = '<ul style="list-style:none;padding:0;">';
+            bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> <strong>${b.first_name} ${b.last_name}</strong> &nbsp;&nbsp; Matricola: ${b.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${b.email}   &nbsp;&nbsp;  Ruolo: ${b.role} &nbsp;&nbsp; ${b.time_slot || ''}</li>` });
+            html += '</ul>';
+            div.innerHTML = html;
+        }
+
+        // Disconnect action
+        async function disconnectFromLab() {
+            try {
+                const vpnId = 123;
+                const btn = document.getElementById('disconnect-btn');
+                const msg = document.getElementById('disconnect-message');
+                btn.disabled = true; btn.style.background = '#6c757d'; btn.style.cursor = 'not-allowed';
+                const data = await safeFetchJSON(`${SRL_SERVICE_URL}/close_connection?vpn_id=${vpnId}`);
+                if (data && data.release_lsb) { msg.innerHTML = `<p style="color:#28a745;font-weight:bold;">✅ ${data.release_lsb}</p>`; }
+                else { msg.innerHTML = `<p style="color:#ffc107;font-weight:bold;">⚠️ Disconnected (no message)</p>`; }
+                setTimeout(()=>{ btn.disabled=false; btn.style.background='#dc3545'; btn.style.cursor='pointer'; msg.innerHTML=''; },5000);
+            } catch (e) {
+                console.error('disconnect error', e);
+                const msg = document.getElementById('disconnect-message'); msg.innerHTML = '<p style="color:red;font-weight:bold;">❌ Error disconnecting</p>';
+                setTimeout(()=>{ const btn = document.getElementById('disconnect-btn'); btn.disabled=false; btn.style.background='#dc3545'; btn.style.cursor='pointer'; msg.innerHTML=''; },5000);
+            }
+        }
+
+        document.getElementById('disconnect-btn').addEventListener('click', disconnectFromLab);
+
+        // Charts setup
+        let x = [], y = []; const maxPoints = 50;
+        Plotly.newPlot('line-plot', [{ x: [], y: [], mode: 'lines', name: 'Signal', line: { shape: 'spline' } }], { title: 'Signal Over Time' });
+        Plotly.newPlot('bar-plot', [{ x: ['A','B','C'], y: [0,0,0], type: 'bar', name: 'Category Values' }], { title: 'Bar Chart' });
+        Plotly.newPlot('pie-chart', [{ labels: ['A','B','C'], values: [0,0,0], type: 'pie', textinfo: 'label+percent' }], { title: 'Pie Chart' });
+
+        function handleNewData(data) {
+            x.push(data.time); y.push(data.value);
+            if (x.length > maxPoints) { x.shift(); y.shift(); }
+            Plotly.update('line-plot', { x: [x], y: [y] });
+            Plotly.update('bar-plot', { y: [[data.categories.A, data.categories.B, data.categories.C]] });
+            Plotly.update('pie-chart', { values: [[data.categories.A, data.categories.B, data.categories.C]] });
+        }
+
+        // Try to connect to socket.io server at localhost:5000 (where the python version ran).
+        let socket = null;
+        let socketConnected = false;
+        function tryConnectSocket() {
+            try {
+                socket = io('http://localhost:5000', { transports: ['websocket', 'polling'] });
+                socket.on('connect', () => { socketConnected = true; console.log('Connected to socket server'); });
+                socket.on('new_data', (d) => { handleNewData(d); });
+                socket.on('disconnect', () => { socketConnected = false; console.warn('Socket disconnected'); });
+            } catch (e) {
+                console.warn('Socket.io connect failed', e);
+                socket = null; socketConnected = false;
+            }
+        }
+
+        // If no socket server is available, simulate data client-side
+        let simInterval = null;
+        let simT = 0;
+        let simAmplitude = parseFloat(document.getElementById('amplitude').value) || 1.0;
+        function startSimulatedEmitter() {
+            if (simInterval) return;
+            simInterval = setInterval(() => {
+                const val = simAmplitude * Math.sin(simT) + (Math.random() * 0.2 - 0.1);
+                const categories = { A: Math.floor(10 + Math.random()*20), B: Math.floor(5 + Math.random()*20), C: Math.floor(15 + Math.random()*20) };
+                handleNewData({ time: parseFloat(simT.toFixed(2)), value: parseFloat(val.toFixed(3)), categories });
+                simT += 0.1;
+            }, 500);
+        }
+
+        // slider behavior — tell socket or local sim
+        const ampSlider = document.getElementById('amplitude');
+        const ampValue = document.getElementById('amp-value');
+        ampSlider.addEventListener('input', () => {
+            ampValue.textContent = ampSlider.value;
+            simAmplitude = parseFloat(ampSlider.value);
+            if (socket && socketConnected) { socket.emit('set_amplitude', parseFloat(ampSlider.value)); }
+        });
+
+        // Initialization
+        (async function init() {
+            // Fetch initial data from SRL service
+            fetchUserData(); fetchWaitingUsers(); fetchInLabUsers(); fetchBookings();
+
+            // Attempt socket connection; if not connected after 1000ms, start simulation
+            tryConnectSocket();
+            setTimeout(() => {
+                if (!socketConnected) {
+                    console.log('No socket server found — falling back to simulated data');
+                    startSimulatedEmitter();
+                }
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>

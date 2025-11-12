@@ -20,7 +20,7 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live Experiment Dashboard</title>
+    <title>LSB Python</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <style>
@@ -32,12 +32,12 @@ HTML_PAGE = """
     </style>
 </head>
 <body>
-    <h1>🔬 Real-Time Experiment Dashboard</h1>
+    <h1>🔬 Dashboard Esperimento LSB di prova</h1>
 
     <div id="user-data" style="text-align: center; margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 8px;">
         <div id="user-info">Loading user data...</div>
         <button id="disconnect-btn" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
-            🔌 Disconnect from Lab
+            🔌 Esci dal Lab
         </button>
         <div id="disconnect-message" style="margin-top: 10px;"></div>
     </div>
@@ -55,17 +55,17 @@ HTML_PAGE = """
     </div>
 
     <div id="waiting-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="text-align: center; margin-bottom: 15px;">👥 Users Waiting to Enter the Lab</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">👥 Utenti in attesa di entrare nel Lab</h3>
         <div id="waiting-users-list">Loading waiting users...</div>
     </div>
 
     <div id="inlab-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="text-align: center; margin-bottom: 15px;">✅ Users Currently in the Lab</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">✅ Utenti nel Lab</h3>
         <div id="inlab-users-list">Loading users in lab...</div>
     </div>
 
     <div id="bookings-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="text-align: center; margin-bottom: 15px;">📅 Current Lab Bookings</h3>
+        <h3 style="text-align: center; margin-bottom: 15px;">📅 Prenotazioni del Lab</h3>
         <div id="bookings-list">Loading bookings...</div>
     </div>
 
@@ -83,7 +83,7 @@ HTML_PAGE = """
                     const userData = data.message;
                     const userInfoDiv = document.getElementById('user-info');
                     userInfoDiv.innerHTML = `
-                        <h2 style="margin: 10px 0;">Welcome back, ${userData.first_name} ${userData.last_name}!</h2>
+                        <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
                         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
                             <span><strong>Email:</strong> ${userData.email}</span>
                             <span><strong>Matricola:</strong> ${userData.matricola}</span>

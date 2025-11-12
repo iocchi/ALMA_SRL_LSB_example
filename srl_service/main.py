@@ -17,17 +17,15 @@ app.add_middleware(
 )
 
 @app.get("/user_data")
-async def get_user(vpn_id: int):
+async def get_user(vpn_ip: str):
     """
     Retrieve user data by ID.
 
-    - **vpn_id**: The VPN ID to identify the user
+    - **vpn_ip**: The VPN ID to identify the user
     """
     try:
-        if vpn_id <= 0:
-            raise ValueError("Invalid VPN ID")
         user_data = {
-            "vpn_id" : vpn_id,
+            "vpn_ip" : vpn_ip,
             "matricola" : "1111234",
             "first_name": "Mario",
             "last_name": "Rossi",
@@ -92,29 +90,29 @@ async def inlab_users():
     Returns the list of users that are inside the lab
     """
     try: 
-        waiting_users = [
+        inlab_users = [
             {
                 "id": "3",
-                "first_name": "Lucia",
-                "last_name": "Verdi",
+                "first_name": "Alberto",
+                "last_name": "Bianchi",
                 "email": "lverdi@test.it",
                 "matricola" : "3333456",
                 "role": "student",
                 "access_at": "2025-05-11 14:45:15",
-                "vpn_id" : "192.168.0.14"
+                "vpn_ip" : "192.168.0.14"
             },
             {
                 "id": "4",
-                "first_name": "Giovanni",
-                "last_name": "Neri",
+                "first_name": "Giovanna",
+                "last_name": "Verdi",
                 "email": "gneri@test.it",
                 "matricola" : "4444456",
                 "role": "student",
                 "access_at": "2025-05-11 15:00:00",
-                "vpn_id" : "192.168.0.15"
+                "vpn_ip" : "192.168.0.15"
             },
         ]
-        return {"waiting_users": waiting_users}
+        return {"inlab_users": inlab_users}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -125,15 +123,13 @@ async def inlab_users():
 
 
 @app.get("/close_connection")
-async def close_connection(vpn_id: int):
+async def close_connection(vpn_ip: str):
     """
     Notifies SRL that the connection with the LSB has being closed by the user.
 
-    - **vpn_id**: The VPN ID to identify the user
+    - **vpn_ip**: The VPN ID to identify the user
     """
     try:
-        if vpn_id <= 0:
-            raise ValueError("Invalid VPN ID")
         return {"release_lsb": "Successfully closed connection with SRL"}
     except ValueError as ve:
         # Handle known validation errors
@@ -156,15 +152,15 @@ async def bookings():
                 "first_name" : "Mario",
                 "last_name" : "Rossi",
                 "email" : "mrossi@test.it",
-                "role" : "student"
+                "role" : "studente"
             },
             {
                 "time_slot" : "2025-05-11 15:30:00",
                 "id" : "2",
-                "first_name" : "Bob",
-                "last_name" : "Bbianchi",
+                "first_name" : "Carla",
+                "last_name" : "Bianchi",
                 "email" : "bbianchi@test.it",
-                "role" : "student"
+                "role" : "studente"
             }
         ]
         return {"current_bookings": bookings}

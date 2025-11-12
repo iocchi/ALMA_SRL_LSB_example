@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LSB — Static Dashboard</title>
+    <title>LSB HTML/JS</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <style>
@@ -16,12 +16,12 @@
     </style>
 </head>
 <body>
-    <h1>🔬 Real-Time Experiment Dashboard (Static)</h1>
+    <h1>🔬 Dashboard Esperimento LSB di prova</h1>
 
     <div id="user-data" class="card" style="text-align: center;">
         <div id="user-info">Loading user data...</div>
         <button id="disconnect-btn" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
-            🔌 Disconnect from Lab
+            🔌 Esci dal Lab
         </button>
         <div id="disconnect-message" style="margin-top: 10px;"></div>
     </div>
@@ -39,23 +39,25 @@
     </div>
 
     <div id="waiting-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
-        <h3 style="text-align: center; margin-bottom: 10px;">👥 Users Waiting to Enter the Lab</h3>
+        <h3 style="text-align: center; margin-bottom: 10px;">👥 Utenti in attesa di entrare nel Lab</h3>
         <div id="waiting-users-list">Loading waiting users...</div>
     </div>
 
     <div id="inlab-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
-        <h3 style="text-align: center; margin-bottom: 10px;">✅ Users Currently in the Lab</h3>
+        <h3 style="text-align: center; margin-bottom: 10px;">✅ Utenti nel Lab</h3>
         <div id="inlab-users-list">Loading users in lab...</div>
     </div>
 
     <div id="bookings-section" class="card" style="margin: 20px auto; max-width: 900px;">
-        <h3 style="text-align: center; margin-bottom: 10px;">📅 Current Lab Bookings</h3>
+        <h3 style="text-align: center; margin-bottom: 10px;">📅 Prenotazioni del Lab </h3>
         <div id="bookings-list">Loading bookings...</div>
     </div>
 
     <script>
         // Browser-facing SRL service base URL (static file should use localhost)
-        const SRL_SERVICE_URL = 'http://localhost:8000';
+
+
+        const SRL_SERVICE_URL = 'http://151.100.59.107:8000';   // accesso server SRL remoto
 
         async function safeFetchJSON(url) {
             try {
@@ -77,12 +79,13 @@
             }
             const userData = data.message;
             userInfoDiv.innerHTML = `
-                <h2 style="margin: 10px 0;">Welcome back, ${userData.first_name} ${userData.last_name}!</h2>
+                <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;"> 
                     <span><strong>Email:</strong> ${userData.email}</span>
                     <span><strong>Matricola:</strong> ${userData.matricola}</span>
                     <span><strong>Role:</strong> ${userData.role}</span>
                     <span><strong>Status:</strong> ${userData.status}</span>
+                    <span><strong>Sei entrato nel Lab alle:</strong> ${userData.LabAccessTime}</span>
                 </div>
             `;
         }
@@ -94,7 +97,7 @@
             const users = data.waiting_users;
             if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users waiting</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
-            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #007bff;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp; (${u.matricola}) &nbsp; ${u.email}</li>` });
+            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #007bff;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} <br> In attesa da: ${u.waiting_since} </li>` });
             html += '</ul>';
             div.innerHTML = html;
         }
@@ -106,7 +109,7 @@
             const users = data.waiting_users;
             if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
-            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #28a745;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp; (${u.vpn_id || ''}) &nbsp; ${u.email}</li>` });
+            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #28a745;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} &nbsp;&nbsp; VPN IP: ${u.vpn_id || ''} <br> In lab da: ${u.access_at}</li>` });
             html += '</ul>';
             div.innerHTML = html;
         }
@@ -118,7 +121,7 @@
             const bookings = data.current_bookings;
             if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
-            bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> <strong>${b.first_name} ${b.last_name}</strong> &nbsp; ${b.time_slot || ''}</li>` });
+            bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> <strong>${b.first_name} ${b.last_name}</strong> &nbsp;&nbsp; Matricola: ${b.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${b.email}   &nbsp;&nbsp;  Ruolo: ${b.role} &nbsp;&nbsp; ${b.time_slot || ''}</li>` });
             html += '</ul>';
             div.innerHTML = html;
         }
