@@ -69,15 +69,44 @@
             }
         }
 
+
+
+        // Function to fetch and display the client's IP address
+        async function getClientIp() {
+            
+            try {
+                // Use a simple API that returns the client's IP
+                const response = await fetch('https://api.ipify.org?format=json');
+                
+                if (!response.ok) {
+                    console.error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const ip = data.ip;
+                console.log("client IP: "+ip)
+                
+                return ip;
+                
+            } catch (error) {
+                console.error("Error fetching IP:", error);
+                ipDisplay.textContent = "Error: Could not retrieve IP address.";
+                return "error";
+            }
+            
+        }
+
+
+
         async function fetchUserData() {
-            const vpnIp = 123;
+            const vpnIp = await getClientIp();
             const data = await safeFetchJSON(`${SRL_SERVICE_URL}/user_data?vpn_ip=${vpnIp}`);
             const userInfoDiv = document.getElementById('user-info');
-            if (!data || !data.message) {
+            if (!data || !data.user_data) {
                 userInfoDiv.innerHTML = '<p style="color: #6c757d;">No user data available</p>';
                 return;
             }
-            const userData = data.message;
+            const userData = data.user_data;
             userInfoDiv.innerHTML = `
                 <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;"> 
@@ -85,6 +114,7 @@
                     <span><strong>Matricola:</strong> ${userData.matricola}</span>
                     <span><strong>Role:</strong> ${userData.role}</span>
                     <span><strong>Status:</strong> ${userData.status}</span>
+                    <span><strong>IP:</strong> ${userData.vpn_ip}</span>
                     <span><strong>Sei entrato nel Lab alle:</strong> ${userData.LabAccessTime}</span>
                 </div>
             `;
@@ -129,12 +159,12 @@
         // Disconnect action
         async function disconnectFromLab() {
             try {
-                const vpnIp = 123;
+                const vpnIp = await getClientIp();
                 const btn = document.getElementById('disconnect-btn');
                 const msg = document.getElementById('disconnect-message');
                 btn.disabled = true; btn.style.background = '#6c757d'; btn.style.cursor = 'not-allowed';
                 const data = await safeFetchJSON(`${SRL_SERVICE_URL}/close_connection?vpn_ip=${vpnIp}`);
-                if (data && data.release_lsb) { msg.innerHTML = `<p style="color:#28a745;font-weight:bold;">✅ ${data.release_lsb}</p>`; }
+                if (data && data.close_connection) { msg.innerHTML = `<p style="color:#28a745;font-weight:bold;">✅ ${vpnIp} disconnected ${data.close_connection.status}</p>`; }
                 else { msg.innerHTML = `<p style="color:#ffc107;font-weight:bold;">⚠️ Disconnected (no message)</p>`; }
                 setTimeout(()=>{ btn.disabled=false; btn.style.background='#dc3545'; btn.style.cursor='pointer'; msg.innerHTML=''; },5000);
             } catch (e) {

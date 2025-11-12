@@ -3,8 +3,130 @@
 Nell'ambito del progetto Digital Education Hub ALMA, è stato sviluppato il sistema Sapienza Remote Lab (SRL) che consente di definire e accedere a laboratori remoti attraverso l'implementazione di Lab Specific Bridge (LSB).
 
 Questo repository contiene alcune informazioni e diversi esempi utili allo sviluppo di LSB.
-In particolare, sono presenti uno stub che simula i servizi esposti dal sistema SRL per sviluppare e debbuggare l'interfaccia tra SRL e LSB
-e alcuni esempi di porzioni di codice che possono essere inserite o da cui prendere spunto per implementare l'interazione SRL - LSB.
+In particolare, sono presenti uno stub che simula i servizi esposti dal sistema SRL per sviluppare e debbuggare l'interfaccia tra SRL e LSB e alcuni esempi di porzioni di codice che possono essere inserite o da cui prendere spunto per implementare l'interazione SRL - LSB. La versione finale del LSB dovrà poi collegarsi con il server di produzione (le istruzioni saranno fornite agli sviluppatori del LSB).
+
+I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP e il metodo get e restituiscono informazioni in formato JSON.
+
+
+## Servizi disponibili
+
+- `/user_data?vpn_ip=....` : dati dell'utente connesso con VPN IP specificato
+- `/close_connection?vpn_ip=...`: segnale di chiusura della connessione dell'utente con VPN IP specificato
+- `/inlab_users`: lista degli utenti attualmente nel Lab
+- `/waiting_users`: lista degli utenti in attesa di entrare in Lab
+- `/bookings`: lista delle prenotazioni del Lab
+
+Esempi:
+
+```
+
+    http://151.100.59.107:9890/user_data?vpn_ip=10.0.1.100
+    
+    {"message": 
+      {
+        "vpn_ip":"10.0.1.100",
+        "matricola":"1111234",
+        "first_name":"Mario",
+        "last_name":"Rossi",
+        "email":"mrossi@test.it",
+        "status":"active",
+        "role":"student",
+        "ID_lab":"1",
+        "privilege":"1",
+        "IDMAccessTime":"2025-06-11 14:30:00",
+        "LabAccessTime":"2025-06-11 15:30:00",
+        "created_at":"2025-05-11 14:30:00"
+      }
+    }
+
+
+    http://151.100.59.107:9890/close_connection?vpn_ip=10.0.1.100
+
+    {
+      "release_lsb": "Successfully closed connection with SRL" 
+    }
+
+
+    http://151.100.59.107:9890/inlab_users
+
+    {"inlab_users":
+      [
+        {
+          "id":"3","first_name":"Alberto",
+          "last_name":"Bianchi",
+          "email":"abianchi@test.it",
+          "matricola":"3333456",
+          "role":"student",
+          "access_at":"2025-05-11 14:45:15",
+          "vpn_ip":"192.168.0.14"
+        },
+        {
+          "id":"4",
+          "first_name":"Giovanna",
+          "last_name":"Verdi",
+          "email":"gverdi@test.it",
+          "matricola":"4444456",
+          "role":"student",
+          "access_at":"2025-05-11 15:00:00",
+          "vpn_ip":"192.168.0.15"
+        }
+      ]
+    }
+
+
+    http://151.100.59.107:9890/waiting_users
+
+    {"waiting_users":
+      [
+        {
+          "id":"3",
+          "first_name":"Lucia",
+          "last_name":"Verdi",
+          "email":"lverdi@test.it",
+          "matricola":"2345678",
+          "role":"student",
+          "waiting_since":"2025-05-11 14:45:15"
+        },
+        {
+          "id":"4",
+          "first_name":"Giovanni",
+          "last_name":"Neri",
+          "email":"gneri@test.it",
+          "matricola":"7777654",
+          "role":"student",
+          "waiting_since":"2025-05-11 15:00:00"
+        }
+      ]
+    }
+
+
+    http://151.100.59.107:9890/bookings
+
+    {"current_bookings":
+      [
+        {
+          "time_slot":"2025-05-11 14:30:00",
+          "id":"1",
+          "first_name":"Mario",
+          "last_name":"Rossi",
+          "email":"mrossi@test.it",
+          "matricola":"1111234",
+          "role":"studente"
+        },
+        {
+          "time_slot":"2025-05-11 15:30:00",
+          "id":"2",
+          "first_name":"Carla",
+          "last_name":"Bianchi",
+          "email":"cbianchi@test.it",
+          "matricola":"5553456",
+          "role":"studente"
+        }
+      ]
+    }
+
+
+```
 
 
 ## Stub SRL dei servizi offerti da SRL
@@ -26,7 +148,7 @@ Tre opzioni disponibili:
 
 ### 1. Esecuzione del sistema senza installazione di app e librerie
 
-In questa mnodalità è possibile accedere solo tramite *LSB HTML/JS* usando il server SRL Service disponibile all'URL `http://151.100.59.107:8000/`
+In questa mnodalità è possibile accedere solo tramite *LSB HTML/JS* usando il server SRL Service disponibile all'URL `http://151.100.59.107:9890/`
 
 
 Aprire il file con un browser  `file://<PATH_TO>/lsb/lsb1.html`
@@ -130,19 +252,12 @@ python lsb/main.py --host 0.0.0.0 --port 6000 --srl-host localhost --srl-port 90
 
 
 
-## Servizi disponibili
-
-- `/user_data?vpn_ip=....`
-- `/inlab_users`
-- `/close_connection`
-- `/waiting_users`
-- `/bookings`
 
 
 
 ## Accesso diretto ai servizi
 
-Nota: gli esempi che seguono usano l'accesso al server SRL locale tramite `localhost`. Per accedere ai servizi remoti, usare invece l'IP `151.100.59.107`.
+Nota: gli esempi che seguono usano l'accesso al server SRL locale tramite `localhost:8000`. Per accedere ai servizi remoti, usare invece `151.100.59.107:9890`.
 
 **SRL API** 
 
@@ -208,10 +323,10 @@ SRL_PORT=9000 ./run-containers.sh srl_service
 
 **4. Solo servizio LSB che si connette a SRL esterno:**
 ```bash
-LSB_PORT=6000 SRL_CONNECT_HOST=151.100.59.107 SRL_CONNECT_PORT=8000 ./run-containers.sh lsb_service
+LSB_PORT=6000 SRL_CONNECT_HOST=151.100.59.107 SRL_CONNECT_PORT=9890 ./run-containers.sh lsb_service
 ```
 - LSB disponibile su: `http://localhost:6000`
-- LSB si connette a SRL su `151.100.59.107:8000`
+- LSB si connette a SRL su `151.100.59.107:9890`
 
 **5. LSB si connette a SRL sulla macchina host:**
 ```bash

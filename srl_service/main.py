@@ -1,5 +1,6 @@
 # file: main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import argparse
@@ -16,13 +17,47 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-@app.get("/user_data")
-async def get_user(vpn_ip: str):
-    """
-    Retrieve user data by ID.
 
-    - **vpn_ip**: The VPN ID to identify the user
+HTML_PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Servizi SRL prova</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f8f9fa; }
+        h1 { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Servizi SRL di prova</h1>
+    
+    <code>/user_data?vpn_ip=....</code>: dati dell'utente connesso con VPN IP specificato <br>
+    
+    <code>/close_connection?vpn_ip=...`</code>: segnale di chiusura della connessione dell'utente con VPN IP specificato
+- `/inlab_users`: lista degli utenti attualmente nel Lab
+- `/waiting_users`: lista degli utenti in attesa di entrare in Lab
+- `/bookings`: lista delle prenotazioni del Lab
+
+</body>
+</html>
+"""
+
+@app.get("/")
+async def index():
+    return HTMLResponse(content=HTML_PAGE)
+
+
+@app.get("/user_data")
+async def get_user(vpn_ip: str, request: Request):
     """
+    Retrieve user data.
+
+    - **vpn_ip**: The VPN IP to identify the user
+    """
+
+    client_ip = request.client.host
+    print(f"Connection from {client_ip}")
+    
     try:
         user_data = {
             "vpn_ip" : vpn_ip,
@@ -38,7 +73,7 @@ async def get_user(vpn_ip: str):
             "LabAccessTime" : "2025-06-11 15:30:00",
             "created_at" : "2025-05-11 14:30:00"
         }
-        return {"message": user_data}
+        return {"user_data": user_data}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -47,6 +82,23 @@ async def get_user(vpn_ip: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
+
+
+@app.get("/close_connection")
+async def close_connection(vpn_ip: str):
+    """
+    Notifies SRL that the connection with the LSB has being closed by the user.
+
+    - **vpn_ip**: The VPN IP to identify the user
+    """
+    try:
+        return {"close_connection": {"status": "success", "vpn_ip" : vpn_ip} }
+    except ValueError as ve:
+        # Handle known validation errors
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        # Catch-all for unexpected errors
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 
@@ -120,23 +172,6 @@ async def inlab_users():
         # Catch-all for unexpected errors
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-
-
-@app.get("/close_connection")
-async def close_connection(vpn_ip: str):
-    """
-    Notifies SRL that the connection with the LSB has being closed by the user.
-
-    - **vpn_ip**: The VPN ID to identify the user
-    """
-    try:
-        return {"release_lsb": "Successfully closed connection with SRL"}
-    except ValueError as ve:
-        # Handle known validation errors
-        raise HTTPException(status_code=400, detail=str(ve))
-    except Exception as e:
-        # Catch-all for unexpected errors
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/bookings")

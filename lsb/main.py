@@ -1,7 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, render_template_string
+from flask import Flask, request, render_template_string
 from flask_socketio import SocketIO
 import math
 import random
@@ -75,12 +75,12 @@ HTML_PAGE = """
         // Fetch user data from SRL service
         async function fetchUserData() {
             try {
-                const vpnIp = 123; // You can change this or make it dynamic
+                const vpnIp = "{{ client_ip }}";
                 const response = await fetch(`${SRL_SERVICE_URL}/user_data?vpn_ip=${vpnIp}`);
                 const data = await response.json();
                 
-                if (data.message) {
-                    const userData = data.message;
+                if (data.user_data) {
+                    const userData = data.user_data;
                     const userInfoDiv = document.getElementById('user-info');
                     userInfoDiv.innerHTML = `
                         <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
@@ -89,6 +89,7 @@ HTML_PAGE = """
                             <span><strong>Matricola:</strong> ${userData.matricola}</span>
                             <span><strong>Role:</strong> ${userData.role}</span>
                             <span><strong>Status:</strong> ${userData.status}</span>
+                            <span><strong>IP:</strong> ${userData.vpn_ip}</span>
                             <span><strong>You accessed the lab at:</strong> ${userData.LabAccessTime}</span>
                         </div>
                     `;
@@ -214,7 +215,7 @@ HTML_PAGE = """
         // Handle disconnect button
         async function disconnectFromLab() {
             try {
-                const vpnIp = 123; // Should match the VPN ID used in fetchUserData
+                const vpnIp = "{{ client_ip }}"; // Should match the VPN IP used in fetchUserData
                 const disconnectBtn = document.getElementById('disconnect-btn');
                 const messageDiv = document.getElementById('disconnect-message');
                 
@@ -228,11 +229,11 @@ HTML_PAGE = """
                 
                 console.log('API Response:', data); // Log the full response
                 
-                if (data.release_lsb) {
-                    console.log('Disconnect message:', data.release_lsb); // Log the message
-                    messageDiv.innerHTML = `<p style="color: #28a745; font-weight: bold;">✅ ${data.release_lsb}</p>`;
+                if (data.close_connection) {
+                    console.log('Disconnect message:', data.close_connection.status); // Log the message
+                    messageDiv.innerHTML = `<p style="color: #28a745; font-weight: bold;">✅ ${data.close_connection.vpn_ip} disconnected ${data.close_connection.status}</p>`;
                 } else {
-                    console.warn('No release_lsb message in response');
+                    console.warn('No close_connection message in response');
                     messageDiv.innerHTML = '<p style="color: #ffc107; font-weight: bold;">⚠️ Disconnected but no message received</p>';
                 }
                 
@@ -304,7 +305,9 @@ amplitude = 1.0
 
 @app.route("/")
 def index():
-    return render_template_string(HTML_PAGE, srl_url=SRL_SERVICE_URL_BROWSER)
+    client_ip = request.remote_addr
+    
+    return render_template_string(HTML_PAGE, srl_url=SRL_SERVICE_URL_BROWSER, client_ip=client_ip)
 
 @socketio.on('set_amplitude')
 def set_amplitude(value):
