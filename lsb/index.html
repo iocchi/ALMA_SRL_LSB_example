@@ -38,14 +38,14 @@
         <div class="chart-box card"><div id="pie-chart"></div></div>
     </div>
 
-    <div id="waiting-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
-        <h3 style="text-align: center; margin-bottom: 10px;">👥 Utenti in attesa di entrare nel Lab</h3>
-        <div id="waiting-users-list">Loading waiting users...</div>
-    </div>
-
     <div id="inlab-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
         <h3 style="text-align: center; margin-bottom: 10px;">✅ Utenti nel Lab</h3>
         <div id="inlab-users-list">Loading users in lab...</div>
+    </div>
+
+    <div id="waiting-users-section" class="card" style="margin: 20px auto; max-width: 900px;">
+        <h3 style="text-align: center; margin-bottom: 10px;">👥 Utenti in attesa di entrare nel Lab</h3>
+        <div id="waiting-users-list">Loading waiting users...</div>
     </div>
 
     <div id="bookings-section" class="card" style="margin: 20px auto; max-width: 900px;">
@@ -57,7 +57,7 @@
         // Browser-facing SRL service base URL (static file should use localhost)
 
 
-        const SRL_SERVICE_URL = 'http://151.100.59.107:8000';   // 'http://localhost:8000';
+        const SRL_SERVICE_URL = 'http://localhost:8000';   // accesso server locale
 
         async function safeFetchJSON(url) {
             try {
@@ -70,8 +70,8 @@
         }
 
         async function fetchUserData() {
-            const vpnId = 123;
-            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/user_data?vpn_id=${vpnId}`);
+            const vpnIp = 123;
+            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/user_data?vpn_ip=${vpnIp}`);
             const userInfoDiv = document.getElementById('user-info');
             if (!data || !data.message) {
                 userInfoDiv.innerHTML = '<p style="color: #6c757d;">No user data available</p>';
@@ -105,11 +105,11 @@
         async function fetchInLabUsers() {
             const data = await safeFetchJSON(`${SRL_SERVICE_URL}/inlab_users`);
             const div = document.getElementById('inlab-users-list');
-            if (!data || !data.waiting_users) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
-            const users = data.waiting_users;
+            if (!data || !data.inlab_users) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
+            const users = data.inlab_users;
             if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
-            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #28a745;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} &nbsp;&nbsp; VPN IP: ${u.vpn_id || ''} <br> In lab da: ${u.access_at}</li>` });
+            users.forEach(u => { html += `<li style="padding:10px;border-left:4px solid #28a745;margin:8px 0;border-radius:4px;"> <strong>${u.first_name} ${u.last_name}</strong> &nbsp;&nbsp; Matricola: ${u.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${u.email}   &nbsp;&nbsp;  Ruolo: ${u.role} &nbsp;&nbsp; VPN IP: ${u.vpn_ip || ''} <br> In Lab da: ${u.access_at}</li>` });
             html += '</ul>';
             div.innerHTML = html;
         }
@@ -121,7 +121,7 @@
             const bookings = data.current_bookings;
             if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
-            bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> <strong>${b.first_name} ${b.last_name}</strong> &nbsp;&nbsp; Matricola: ${b.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${b.email}   &nbsp;&nbsp;  Ruolo: ${b.role} &nbsp;&nbsp; ${b.time_slot || ''}</li>` });
+            bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> ${b.time_slot || ''} &nbsp;&nbsp; <strong>${b.first_name} ${b.last_name}</strong> &nbsp;&nbsp; Matricola: ${b.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${b.email}   &nbsp;&nbsp;  Ruolo: ${b.role}  </li>` });
             html += '</ul>';
             div.innerHTML = html;
         }
@@ -129,11 +129,11 @@
         // Disconnect action
         async function disconnectFromLab() {
             try {
-                const vpnId = 123;
+                const vpnIp = 123;
                 const btn = document.getElementById('disconnect-btn');
                 const msg = document.getElementById('disconnect-message');
                 btn.disabled = true; btn.style.background = '#6c757d'; btn.style.cursor = 'not-allowed';
-                const data = await safeFetchJSON(`${SRL_SERVICE_URL}/close_connection?vpn_id=${vpnId}`);
+                const data = await safeFetchJSON(`${SRL_SERVICE_URL}/close_connection?vpn_ip=${vpnIp}`);
                 if (data && data.release_lsb) { msg.innerHTML = `<p style="color:#28a745;font-weight:bold;">✅ ${data.release_lsb}</p>`; }
                 else { msg.innerHTML = `<p style="color:#ffc107;font-weight:bold;">⚠️ Disconnected (no message)</p>`; }
                 setTimeout(()=>{ btn.disabled=false; btn.style.background='#dc3545'; btn.style.cursor='pointer'; msg.innerHTML=''; },5000);

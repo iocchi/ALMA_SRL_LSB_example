@@ -54,14 +54,14 @@ HTML_PAGE = """
         <div class="chart-box"><div id="pie-chart"></div></div>
     </div>
 
-    <div id="waiting-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="text-align: center; margin-bottom: 15px;">👥 Utenti in attesa di entrare nel Lab</h3>
-        <div id="waiting-users-list">Loading waiting users...</div>
-    </div>
-
     <div id="inlab-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h3 style="text-align: center; margin-bottom: 15px;">✅ Utenti nel Lab</h3>
         <div id="inlab-users-list">Loading users in lab...</div>
+    </div>
+
+    <div id="waiting-users-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin-bottom: 15px;">👥 Utenti in attesa di entrare nel Lab</h3>
+        <div id="waiting-users-list">Loading waiting users...</div>
     </div>
 
     <div id="bookings-section" style="margin: 20px auto; max-width: 800px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -75,8 +75,8 @@ HTML_PAGE = """
         // Fetch user data from SRL service
         async function fetchUserData() {
             try {
-                const vpnId = 123; // You can change this or make it dynamic
-                const response = await fetch(`${SRL_SERVICE_URL}/user_data?vpn_id=${vpnId}`);
+                const vpnIp = 123; // You can change this or make it dynamic
+                const response = await fetch(`${SRL_SERVICE_URL}/user_data?vpn_ip=${vpnIp}`);
                 const data = await response.json();
                 
                 if (data.message) {
@@ -121,7 +121,7 @@ HTML_PAGE = """
                                         <span style="color: #6c757d;">Matricola: ${user.matricola}</span>
                                         <span style="color: #6c757d;">Email: ${user.email}</span>
                                         <span style="color: #6c757d;">Role: ${user.role}</span>
-                                        <span style="color: #dc3545; font-size: 0.9em;">⏰ Waiting since: ${user.waiting_since}</span>
+                                        <span style="color: #dc3545; font-size: 0.9em;">⏰ In attesa da: ${user.waiting_since}</span>
                                     </div>
                                 </li>
                             `;
@@ -142,8 +142,8 @@ HTML_PAGE = """
                 const response = await fetch(`${SRL_SERVICE_URL}/inlab_users`);
                 const data = await response.json();
                 
-                if (data.waiting_users) {
-                    const users = data.waiting_users;
+                if (data.inlab_users) {
+                    const users = data.inlab_users;
                     const inlabListDiv = document.getElementById('inlab-users-list');
                     
                     if (users.length === 0) {
@@ -158,8 +158,8 @@ HTML_PAGE = """
                                         <span style="color: #6c757d;">Matricola: ${user.matricola}</span>
                                         <span style="color: #6c757d;">Email: ${user.email}</span>
                                         <span style="color: #6c757d;">Role: ${user.role}</span>
-                                        <span style="color: #6c757d;">VPN ID: ${user.vpn_id}</span>
-                                        <span style="color: #28a745; font-size: 0.9em;">🚪 Accessed at: ${user.access_at}</span>
+                                        <span style="color: #6c757d;">VPN ID: ${user.vpn_ip}</span>
+                                        <span style="color: #28a745; font-size: 0.9em;">🚪 In Lab da: ${user.access_at}</span>
                                     </div>
                                 </li>
                             `;
@@ -192,10 +192,11 @@ HTML_PAGE = """
                             listHTML += `
                                 <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid #ffc107; border-radius: 4px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                        <span style="color: #7f5107; font-size: 0.9em;">📅 ${booking.time_slot}</span>
                                         <span style="font-weight: bold; font-size: 1.1em;">${booking.first_name} ${booking.last_name}</span>
+                                        <span style="color: #6c757d;">Matricola: ${booking.matricola}</span>
                                         <span style="color: #6c757d;">Email: ${booking.email}</span>
                                         <span style="color: #6c757d;">Role: ${booking.role}</span>
-                                        <span style="color: #ffc107; font-size: 0.9em;">📅 Time Slot: ${booking.time_slot}</span>
                                     </div>
                                 </li>
                             `;
@@ -213,7 +214,7 @@ HTML_PAGE = """
         // Handle disconnect button
         async function disconnectFromLab() {
             try {
-                const vpnId = 123; // Should match the VPN ID used in fetchUserData
+                const vpnIp = 123; // Should match the VPN ID used in fetchUserData
                 const disconnectBtn = document.getElementById('disconnect-btn');
                 const messageDiv = document.getElementById('disconnect-message');
                 
@@ -222,7 +223,7 @@ HTML_PAGE = """
                 disconnectBtn.style.background = '#6c757d';
                 disconnectBtn.style.cursor = 'not-allowed';
                 
-                const response = await fetch(`${SRL_SERVICE_URL}/close_connection?vpn_id=${vpnId}`);
+                const response = await fetch(`${SRL_SERVICE_URL}/close_connection?vpn_ip=${vpnIp}`);
                 const data = await response.json();
                 
                 console.log('API Response:', data); // Log the full response

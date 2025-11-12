@@ -95,7 +95,7 @@ async def inlab_users():
                 "id": "3",
                 "first_name": "Alberto",
                 "last_name": "Bianchi",
-                "email": "lverdi@test.it",
+                "email": "abianchi@test.it",
                 "matricola" : "3333456",
                 "role": "student",
                 "access_at": "2025-05-11 14:45:15",
@@ -105,7 +105,7 @@ async def inlab_users():
                 "id": "4",
                 "first_name": "Giovanna",
                 "last_name": "Verdi",
-                "email": "gneri@test.it",
+                "email": "gverdi@test.it",
                 "matricola" : "4444456",
                 "role": "student",
                 "access_at": "2025-05-11 15:00:00",
@@ -152,6 +152,7 @@ async def bookings():
                 "first_name" : "Mario",
                 "last_name" : "Rossi",
                 "email" : "mrossi@test.it",
+                "matricola" : "1111234",
                 "role" : "studente"
             },
             {
@@ -159,7 +160,8 @@ async def bookings():
                 "id" : "2",
                 "first_name" : "Carla",
                 "last_name" : "Bianchi",
-                "email" : "bbianchi@test.it",
+                "email" : "cbianchi@test.it",
+                "matricola" : "5553456",
                 "role" : "studente"
             }
         ]
