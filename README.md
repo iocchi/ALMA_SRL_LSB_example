@@ -155,7 +155,7 @@ Tre opzioni disponibili:
 
 ### 1. Esecuzione del sistema senza installazione di app e librerie
 
-In questa mnodalità è possibile accedere solo tramite *LSB HTML/JS* usando il server SRL Service disponibile all'URL `http://151.100.59.107:9890/`
+In questa modalità è possibile accedere solo tramite *LSB HTML/JS* usando il server SRL Service disponibile all'URL `http://151.100.59.107:9890/`
 
 
 Aprire il file con un browser  `file://<PATH_TO>/lsb/index.html?srl_service_host=151.100.59.107:9890`
