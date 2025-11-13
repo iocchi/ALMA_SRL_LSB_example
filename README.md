@@ -16,6 +16,9 @@ I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP e il met
 - `/waiting_users`: lista degli utenti in attesa di entrare in Lab
 - `/bookings`: lista delle prenotazioni del Lab
 
+I servizi si possono provare accedendo alla pagina `http://151.100.59.107:9890/`
+
+
 Esempi:
 
 ```
