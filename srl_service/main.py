@@ -31,21 +31,23 @@ HTML_PAGE = """
 <body>
     <h1>Servizi SRL di prova</h1>
     
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>/user_data?vpn_ip=....</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>/close_connection?vpn_ip=...</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>/inlab_users</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>/waiting_users</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>GET /user/by-ip/{vpn_ip}</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>PUT /user/{vpn_ip}/disconnect</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>GET /service/inlab</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>GET /service/waiting</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>GET /service/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink6"> <code>PATCH /service/availability/{available}</code> </a> </span>: imposta la disponibilità del Lab </p>
 
 <script>
 
 const host = window.location.host; 
     
-document.getElementById('alink1').href=`//${host}/user_data?vpn_ip=10.0.1.100`;
-document.getElementById('alink2').href=`//${host}/close_connection?vpn_ip=10.0.1.100`;
-document.getElementById('alink3').href=`//${host}/inlab_users`;
-document.getElementById('alink4').href=`//${host}/waiting_users`;
-document.getElementById('alink5').href=`//${host}/bookings`;
+document.getElementById('alink1').href=`//${host}/user/by-ip/10.0.1.100`;
+document.getElementById('alink2').href=`//${host}/user/10.0.1.100/disconnect`;
+document.getElementById('alink3').href=`//${host}/service/inlab`;
+document.getElementById('alink4').href=`//${host}/service/waiting`;
+document.getElementById('alink5').href=`//${host}/service/bookings`;
+document.getElementById('alink6').href=`//${host}/service/availability/true`;
     
 </script>
 

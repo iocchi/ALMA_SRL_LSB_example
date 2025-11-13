@@ -5,16 +5,17 @@ Nell'ambito del progetto Digital Education Hub ALMA, è stato sviluppato il sist
 Questo repository contiene alcune informazioni e diversi esempi utili allo sviluppo di LSB.
 In particolare, sono presenti uno stub che simula i servizi esposti dal sistema SRL per sviluppare e debbuggare l'interfaccia tra SRL e LSB e alcuni esempi di porzioni di codice che possono essere inserite o da cui prendere spunto per implementare l'interazione SRL - LSB. La versione finale del LSB dovrà poi collegarsi con il server di produzione (le istruzioni saranno fornite agli sviluppatori del LSB).
 
-I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP e il metodo get e restituiscono informazioni in formato JSON.
+I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP (metodi GET, PUT, PATCH) e restituiscono informazioni in formato JSON.
 
 
 ## Servizi disponibili
 
-- `/user_data?vpn_ip=....` : dati dell'utente connesso con VPN IP specificato
-- `/close_connection?vpn_ip=...`: segnale di chiusura della connessione dell'utente con VPN IP specificato
-- `/inlab_users`: lista degli utenti attualmente nel Lab
-- `/waiting_users`: lista degli utenti in attesa di entrare in Lab
-- `/bookings`: lista delle prenotazioni del Lab
+- **GET** `/user/by-ip/{vpn_ip}` : dati dell'utente connesso con VPN IP specificato
+- **PUT** `/user/{vpn_ip}/disconnect` : segnale di chiusura della connessione dell'utente con VPN IP specificato
+- **GET** `/service/inlab` : lista degli utenti attualmente nel Lab
+- **GET** `/service/waiting` : lista degli utenti in attesa di entrare in Lab
+- **GET** `/service/bookings` : lista delle prenotazioni del Lab
+- **PATCH** `/service/availability/{available}` : imposta la disponibilità del Lab (true/false)
 
 I servizi si possono provare accedendo alla pagina `http://151.100.59.107:9890/`
 
