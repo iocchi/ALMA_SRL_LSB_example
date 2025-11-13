@@ -36,9 +36,17 @@ HTML_PAGE = """
 
     <div id="user-data" style="text-align: center; margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 8px;">
         <div id="user-info">Loading user data...</div>
-        <button id="disconnect-btn" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
-            🔌 Esci dal Lab
-        </button>
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <button id="disconnect-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
+                🔌 Esci dal Lab
+            </button>
+            <button id="set-available-btn" style="display: none; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
+                ✅ Imposta Laboratorio Disponibile
+            </button>
+            <button id="set-unavailable-btn" style="display: none; padding: 10px 20px; background: #ffc107; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold;">
+                ⛔ Imposta Laboratorio Non Disponibile
+            </button>
+        </div>
         <div id="disconnect-message" style="margin-top: 10px;"></div>
     </div>
 
@@ -75,14 +83,15 @@ HTML_PAGE = """
         // Fetch user data from SRL service
         async function fetchUserData() {
             try {
-                const vpnIp = "{{ client_ip }}";
-                const response = await fetch(`${SRL_SERVICE_URL}/user_data?vpn_ip=${vpnIp}`);
+                const vpn_ip = "{{ client_ip }}";
+                const response = await fetch(`${SRL_SERVICE_URL}/user/by-ip/${vpn_ip}`);
                 const data = await response.json();
                 
-                if (data.user_data) {
-                    const userData = data.user_data;
+                if (data.user) {
+                    const userData = data.user;
                     const userInfoDiv = document.getElementById('user-info');
-                    userInfoDiv.innerHTML = `
+                    
+                    let userInfoHTML = `
                         <h2 style="margin: 10px 0;">Ciao ${userData.first_name} ${userData.last_name}!</h2>
                         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
                             <span><strong>Email:</strong> ${userData.email}</span>
@@ -90,10 +99,22 @@ HTML_PAGE = """
                             <span><strong>Ruolo:</strong> ${userData.role}</span>
                             <span><strong>Stato:</strong> ${userData.status}</span>
                             <span><strong>IP:</strong> ${userData.vpn_ip}</span>
-                            <span><strong>Sei entrato nel Lab a:</strong> ${userData.LabAccessTime}</span>
-                            <span><strong>La connessione sarà attiva fino a:</strong> ${userData.LabEndTime}</span>
-                        </div>
                     `;
+                    
+                    if (userData.wait_timestamp) {
+                        userInfoHTML += `<span><strong>In attesa da:</strong> ${userData.wait_timestamp}</span>`;
+                    }
+                    
+                    if (userData.lsb_access_timestamp) {
+                        userInfoHTML += `<span><strong>Sei entrato nel Lab a:</strong> ${userData.lsb_access_timestamp}</span>`;
+                    }
+                    
+                    if (userData.booking_end_time) {
+                        userInfoHTML += `<span><strong>La connessione sarà attiva fino a:</strong> ${userData.booking_end_time}</span>`;
+                    }
+                    
+                    userInfoHTML += `</div>`;
+                    userInfoDiv.innerHTML = userInfoHTML;
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
@@ -104,13 +125,12 @@ HTML_PAGE = """
         // Fetch waiting users from SRL service
         async function fetchWaitingUsers() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/waiting_users`);
-                const data = await response.json();
+                const response = await fetch(`${SRL_SERVICE_URL}/service/waiting`);
+                const users = await response.json();
                 
-                if (data.waiting_users) {
-                    const users = data.waiting_users;
-                    const waitingListDiv = document.getElementById('waiting-users-list');
-                    
+                const waitingListDiv = document.getElementById('waiting-users-list');
+                
+                if (Array.isArray(users)) {
                     if (users.length === 0) {
                         waitingListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No users waiting</p>';
                     } else {
@@ -131,6 +151,8 @@ HTML_PAGE = """
                         listHTML += '</ul>';
                         waitingListDiv.innerHTML = listHTML;
                     }
+                } else {
+                    waitingListDiv.innerHTML = '<p style="color: red; text-align: center;">Invalid data format received</p>';
                 }
             } catch (error) {
                 console.error('Error fetching waiting users:', error);
@@ -141,13 +163,12 @@ HTML_PAGE = """
         // Fetch in-lab users from SRL service
         async function fetchInLabUsers() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/inlab_users`);
-                const data = await response.json();
+                const response = await fetch(`${SRL_SERVICE_URL}/service/inlab`);
+                const users = await response.json();
                 
-                if (data.inlab_users) {
-                    const users = data.inlab_users;
-                    const inlabListDiv = document.getElementById('inlab-users-list');
-                    
+                const inlabListDiv = document.getElementById('inlab-users-list');
+                
+                if (Array.isArray(users)) {
                     if (users.length === 0) {
                         inlabListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No users in lab</p>';
                     } else {
@@ -160,8 +181,9 @@ HTML_PAGE = """
                                         <span style="color: #6c757d;">Matricola: ${user.matricola}</span>
                                         <span style="color: #6c757d;">Email: ${user.email}</span>
                                         <span style="color: #6c757d;">Role: ${user.role}</span>
-                                        <span style="color: #6c757d;">VPN ID: ${user.vpn_ip}</span>
-                                        <span style="color: #28a745; font-size: 0.9em;">🚪 In Lab da: ${user.access_at}</span>
+                                        <span style="color: #6c757d;">Stato: ${user.status}</span>
+                                        <span style="color: #6c757d;">VPN IP: ${user.vpn_ip}</span>
+                                        <span style="color: #28a745; font-size: 0.9em;">🚪 In Lab da: ${user.lsb_access_timestamp}</span>
                                     </div>
                                 </li>
                             `;
@@ -169,6 +191,8 @@ HTML_PAGE = """
                         listHTML += '</ul>';
                         inlabListDiv.innerHTML = listHTML;
                     }
+                } else {
+                    inlabListDiv.innerHTML = '<p style="color: red; text-align: center;">Invalid data format received</p>';
                 }
             } catch (error) {
                 console.error('Error fetching in-lab users:', error);
@@ -179,7 +203,7 @@ HTML_PAGE = """
         // Fetch bookings from SRL service
         async function fetchBookings() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/bookings`);
+                const response = await fetch(`${SRL_SERVICE_URL}/service/bookings`);
                 const data = await response.json();
                 
                 if (data.bookings) {
@@ -191,14 +215,18 @@ HTML_PAGE = """
                     } else {
                         let listHTML = '<ul style="list-style: none; padding: 0;">';
                         bookings.forEach(booking => {
+                            const statusColor = booking.status === 'confirmed' ? '#28a745' : booking.status === 'expired' ? '#dc3545' : '#ffc107';
+                            const endTime = booking.end_time ? ` - ${booking.end_time}` : '';
                             listHTML += `
-                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid ${statusColor}; border-radius: 4px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                        <span style="color: #7f5107; font-size: 0.9em;">📅 ${booking.time_slot}</span>
-                                        <span style="font-weight: bold; font-size: 1.1em;">${booking.first_name} ${booking.last_name}</span>
-                                        <span style="color: #6c757d;">Matricola: ${booking.matricola}</span>
-                                        <span style="color: #6c757d;">Email: ${booking.email}</span>
-                                        <span style="color: #6c757d;">Role: ${booking.role}</span>
+                                        <span style="color: #7f5107; font-size: 0.9em;">📅 ${booking.start_time}${endTime}</span>
+                                        <span style="font-weight: bold; font-size: 1.1em;">Booking ID: ${booking.id}</span>
+                                        <span style="color: #6c757d;">User ID: ${booking.user_id}</span>
+                                        <span style="color: #6c757d;">Service ID: ${booking.service_id}</span>
+                                        <span style="color: #6c757d;">Token: ${booking.token}</span>
+                                        <span style="color: ${statusColor}; font-weight: bold;">Stato: ${booking.status}</span>
+                                        <span style="color: #6c757d; font-size: 0.9em;">Slots: ${booking.num_slots}</span>
                                     </div>
                                 </li>
                             `;
@@ -216,7 +244,7 @@ HTML_PAGE = """
         // Handle disconnect button
         async function disconnectFromLab() {
             try {
-                const vpnIp = "{{ client_ip }}"; // Should match the VPN IP used in fetchUserData
+                const vpn_ip = "{{ client_ip }}";
                 const disconnectBtn = document.getElementById('disconnect-btn');
                 const messageDiv = document.getElementById('disconnect-message');
                 
@@ -225,20 +253,18 @@ HTML_PAGE = """
                 disconnectBtn.style.background = '#6c757d';
                 disconnectBtn.style.cursor = 'not-allowed';
                 
-                const response = await fetch(`${SRL_SERVICE_URL}/close_connection?vpn_ip=${vpnIp}`);
+                const response = await fetch(`${SRL_SERVICE_URL}/user/${vpn_ip}/disconnect`, {
+                    method: 'PUT'
+                });
+                
                 const data = await response.json();
                 
-                console.log('API Response:', data); // Log the full response
+                // Show popup with response data
+                alert(`Disconnessione completata!\n\nRisposta da Sapienza Remote Lab:\n${JSON.stringify(data, null, 2)}`);
                 
-                if (data.close_connection) {
-                    console.log('Disconnect message:', data.close_connection.status); // Log the message
-                    messageDiv.innerHTML = `<p style="color: #28a745; font-weight: bold;">✅ ${data.close_connection.vpn_ip} disconnected ${data.close_connection.status}</p>`;
-                } else {
-                    console.warn('No close_connection message in response');
-                    messageDiv.innerHTML = '<p style="color: #ffc107; font-weight: bold;">⚠️ Disconnected but no message received</p>';
-                }
+                messageDiv.innerHTML = `<p style="color: #28a745; font-weight: bold;">✅ Connessione chiusa</p>`;
                 
-                // Re-enable the button and clear message after 10 seconds
+                // Re-enable the button and clear message after 5 seconds
                 setTimeout(() => {
                     disconnectBtn.disabled = false;
                     disconnectBtn.style.background = '#dc3545';
@@ -253,7 +279,7 @@ HTML_PAGE = """
                 
                 messageDiv.innerHTML = '<p style="color: red; font-weight: bold;">❌ Error disconnecting from lab</p>';
                 
-                // Re-enable the button and clear message after 10 seconds even on error
+                // Re-enable the button and clear message after 5 seconds even on error
                 setTimeout(() => {
                     disconnectBtn.disabled = false;
                     disconnectBtn.style.background = '#dc3545';
@@ -263,8 +289,52 @@ HTML_PAGE = """
             }
         }
 
-        // Add event listener to disconnect button
+        // Handle lab availability buttons
+        let currentAvailability = false; // Default state: unavailable
+        
+        function updateAvailabilityButtons() {
+            const availableBtn = document.getElementById('set-available-btn');
+            const unavailableBtn = document.getElementById('set-unavailable-btn');
+            
+            if (currentAvailability) {
+                // Lab is available, show only the "set unavailable" button
+                availableBtn.style.display = 'none';
+                unavailableBtn.style.display = 'inline-block';
+            } else {
+                // Lab is unavailable, show only the "set available" button
+                availableBtn.style.display = 'inline-block';
+                unavailableBtn.style.display = 'none';
+            }
+        }
+        
+        async function setLabAvailability(available) {
+            try {
+                const response = await fetch(`${SRL_SERVICE_URL}/service/availability/${available}`, {
+                    method: 'PATCH'
+                });
+                
+                const data = await response.json();
+                
+                // Show popup with response data
+                alert(`Disponibilità Lab aggiornata!\n\nRisposta da Sapienza Remote Lab:\n${JSON.stringify(data, null, 2)}`);
+                
+                // Update current state and toggle buttons
+                currentAvailability = available;
+                updateAvailabilityButtons();
+                
+            } catch (error) {
+                console.error('Error setting lab availability:', error);
+                alert(`Errore nell'aggiornamento della disponibilità del Lab:\n${error.message}`);
+            }
+        }
+
+        // Add event listeners
         document.getElementById('disconnect-btn').addEventListener('click', disconnectFromLab);
+        document.getElementById('set-available-btn').addEventListener('click', () => setLabAvailability(true));
+        document.getElementById('set-unavailable-btn').addEventListener('click', () => setLabAvailability(false));
+        
+        // Initialize button visibility
+        updateAvailabilityButtons();
 
         // Fetch user data when page loads
         fetchUserData();

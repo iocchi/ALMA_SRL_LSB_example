@@ -58,7 +58,7 @@ async def index():
     return HTMLResponse(content=HTML_PAGE)
 
 
-@app.get("/user_data")
+@app.get("/user/by-ip/{vpn_ip}")
 async def get_user(vpn_ip: str, request: Request):
     """
     Retrieve user data.
@@ -70,22 +70,24 @@ async def get_user(vpn_ip: str, request: Request):
     print(f"Connection from {client_ip}")
     
     try:
-        user_data = {
+        user = {
             "vpn_ip" : vpn_ip,
+            "id": 1234567,
             "matricola" : "1111234",
             "first_name": "Mario",
             "last_name": "Rossi",
             "email" : "mrossi@test.it",
             "status" : "active",
             "role" : "student",
-            "ID_lab" : "1", 
-            "privilege" : "1",
-            "IDMAccessTime" : "2025-05-20 15:25:38",
-            "LabAccessTime" : "2025-05-20 15:30:00",
-            "LabEndTime" : "2025-05-20 16:00:00",
+            "lab_id" : 1, 
+            "privilege" : 1,
+            "srl_access_timestamp" : "2025-05-20 15:25:38",
+            "lsb_access_timestamp" : "2025-05-20 15:30:00",
+            "booking_end_time" : "2025-05-20 16:00:00",
+            "wait_timestamp": None,
             "created_at" : "2025-04-23 23:30:00"
         }
-        return {"user_data": user_data}
+        return {"user": user,"exists": "true"}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -94,15 +96,32 @@ async def get_user(vpn_ip: str, request: Request):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.get("/close_connection")
-async def close_connection(vpn_ip: str):
+@app.put("/user/{vpn_ip}/disconnect")
+async def disconnect(vpn_ip: str):
     """
     Notifies SRL that the connection with the LSB has being closed by the user.
 
     - **vpn_ip**: The VPN IP to identify the user
     """
     try:
-        return {"close_connection": {"status": "success", "vpn_ip" : vpn_ip} }
+        disconnected_user = {
+        "vpn_ip" : vpn_ip,
+        "id": 1234567,
+        "matricola" : "1111234",
+        "first_name": "Mario",
+        "last_name": "Rossi",
+        "email" : "mrossi@test.it",
+        "status" : "insrl_outlsb",
+        "role" : "student",
+        "lab_id" : 1, 
+        "privilege" : 1,
+        "srl_access_timestamp" : "2025-05-20 15:25:38",
+        "lsb_access_timestamp" : "2025-05-20 15:30:00",
+        "booking_end_time" : "2025-05-20 16:00:00",
+        "wait_timestamp": None,
+        "created_at" : "2025-04-23 23:30:00"
+        }
+        return disconnected_user
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -111,23 +130,29 @@ async def close_connection(vpn_ip: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-
-@app.get("/inlab_users")
-async def inlab_users():
+@app.get("/service/inlab")
+async def inlab():
     """
     Returns the list of users that are inside the lab
     """
     try: 
         inlab_users = [
             {
-                "id": "3",
+                "id": 2345678,
                 "first_name": "Alberto",
                 "last_name": "Bianchi",
                 "email": "abianchi@test.it",
                 "matricola" : "3333456",
                 "role": "student",
-                "access_at": "2025-05-20 15:35:15",
-                "vpn_ip" : "192.168.0.14"
+                "status": "insrl_inlsb",
+                "srl_access_timestamp": "2025-05-20 15:30:00",
+                "lsb_access_timestamp": "2025-05-20 15:35:15",
+                "vpn_ip" : "192.168.0.14",
+                "privilege": 2,
+                "lab_id": 1,
+                "wait_timestamp": None,
+                "created_at": "2025-05-13 23:30:00",
+                "booking_end_time": "2025-05-20 16:00:00"
             },
             {
                 "id": "4",
@@ -136,11 +161,18 @@ async def inlab_users():
                 "email": "gverdi@test.it",
                 "matricola" : "4444456",
                 "role": "student",
-                "access_at": "2025-05-20 15:40:20",
-                "vpn_ip" : "192.168.0.15"
-            },
+                "status": "insrl_inlsb",
+                "srl_access_timestamp": "2025-05-20 16:30:00",
+                "lsb_access_timestamp": "2025-05-20 16:35:15",
+                "vpn_ip" : "192.168.0.15",
+                "privilege": 1,
+                "lab_id": 1,
+                "wait_timestamp": None,
+                "created_at": "2025-05-14 22:30:00",
+                "booking_end_time": "2025-05-20 17:00:00"
+            }
         ]
-        return {"inlab_users": inlab_users}
+        return inlab_users
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -150,33 +182,51 @@ async def inlab_users():
 
 
 
-@app.get("/waiting_users")
-async def waiting_users():
+@app.get("/service/waiting")
+async def waiting():
     """
     Returns the list of users that are outside the lab and are waiting to enter
     """
     try:
         waiting_users = [
             {
-                "id": "3",
+                "id": 3456789,
                 "first_name": "Lucia",
                 "last_name": "Verdi",
                 "email": "lverdi@test.it",
-                "matricola" : "2345678",
+                "matricola" : 2345678,
                 "role": "student",
-                "waiting_since": "2025-05-20 15:45:25"
+                "status": "insrl_outlsb",
+                "privilege": 2,
+                "lab_id": 1,
+                "waiting_since": "2025-05-20 15:45:25",
+                "srl_access_timestamp": "2025-05-20 15:00:00",
+                "lsb_access_timestamp": None,
+                "vpn_ip" : "192.168.0.16",
+                "wait_timestamp": None,
+                "created_at": "2025-05-14 22:30:00",
+                "booking_end_time": None
             },
             {
-                "id": "4",
+                "id": 4567890,
                 "first_name": "Giovanni",
                 "last_name": "Neri",
                 "email": "gneri@test.it",
                 "matricola" : "7777654",
                 "role": "student",
-                "waiting_since": "2025-05-20 15:50:30"
+                "status": "insrl_outlsb",
+                "privilege": 2,
+                "lab_id": 1,
+                "waiting_since": "2025-05-20 15:48:30",
+                "srl_access_timestamp": "2025-05-20 15:40:00",
+                "lsb_access_timestamp": None,
+                "vpn_ip" : "192.168.0.17",
+                "wait_timestamp": None,
+                "created_at": "2025-05-12 22:30:00",
+                "booking_end_time": None
             },
         ]
-        return {"waiting_users": waiting_users}
+        return waiting_users
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -186,33 +236,79 @@ async def waiting_users():
 
 
 
-@app.get("/bookings")
+@app.get("/service/bookings")
 async def bookings():
     """
     Returns the list of bookings available for the lab.
     """
     try:
+
         bookings = [
             {
-                "time_slot" : "2025-05-21 14:30:00",
-                "id" : "1",
-                "first_name" : "Mario",
-                "last_name" : "Rossi",
-                "email" : "mrossi@test.it",
-                "matricola" : "1111234",
-                "role" : "studente"
+                "user_id" : 6789012,
+                "service_id": 1,
+                "num_slots": 1,
+                "booked_capacity": 1,
+                "token": "TOKEN_vpuq78",
+                "start_time": "2025-04-20 17:30:00",
+                "end_time": "2025-04-20 18:00:00",
+                "id": 10,
+                "status": "expired",
+                "created_at": "2025-04-14 22:30:00",
             },
             {
-                "time_slot" : "2025-05-21 15:30:00",
-                "id" : "2",
-                "first_name" : "Carla",
-                "last_name" : "Bianchi",
-                "email" : "cbianchi@test.it",
-                "matricola" : "5553456",
-                "role" : "studente"
+                "user_id": 1,
+                "service_id": 1,
+                "num_slots": 1,
+                "booked_capacity": 1,
+                "token": "TOKEN1",
+                "start_time": "2025-05-20 18:00:00",
+                "end_time": None,
+                "id": 1,
+                "status": "confirmed",
+                "created_at": "2025-05-14 22:30:00"
             }
         ]
         return {"bookings": bookings}
+    except ValueError as ve:
+        # Handle known validation errors
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        # Catch-all for unexpected errors
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@app.patch("/service/availability/{available}")
+async def set_availability(available: bool):
+    """
+    Updates the availability status of the lab service.
+
+    - **available**: Boolean value (true/false) indicating if the lab is available
+    """
+    try:
+        data = {
+            "name": "Dashboard Esperimento LSB di prova",
+            "creator_id": 3,
+            "description_ita": "Router remoto per test",
+            "description_eng": "Remote router for lab tests",
+            "opening_time": "00:00:00",
+            "closing_time": "23:59:00",
+            "under_maintenance": "false",
+            "use_bookings": "false",
+            "slot_duration": 15,
+            "max_capacity": 1,
+            "max_num_bookable_slots": 1,
+            "spectator_mode": "false",
+            "spectator_mode_link": "",
+            "available": available,
+            "ip": "10.112.0.1",
+            "port": "5000",
+            "protocol": "tcp",
+            "entry_point": "",
+            "id": 1,
+            "created_at": "2025-02-14 22:30:00"
+        }
+        return data
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
