@@ -257,7 +257,7 @@ async def bookings():
                 "created_at": "2025-04-14 22:30:00",
             },
             {
-                "user_id": 1,
+                "user_id": 7890123,
                 "service_id": 1,
                 "num_slots": 1,
                 "booked_capacity": 1,
@@ -269,7 +269,7 @@ async def bookings():
                 "created_at": "2025-05-14 22:30:00"
             }
         ]
-        return {"bookings": bookings}
+        return bookings
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))

@@ -23,114 +23,162 @@ Esempi:
 
 ```
 
-    http://151.100.59.107:9890/user_data?vpn_ip=10.0.1.100
+    http://151.100.59.107:9890/user/by-ip/10.0.1.100
     
-    {"user_data": 
+    {"user": 
       {
-        "vpn_ip":"10.0.1.100",
-        "matricola":"1111234",
-        "first_name":"Mario",
-        "last_name":"Rossi",
-        "email":"mrossi@test.it",
-        "status":"active",
-        "role":"student",
-        "ID_lab":"1",
-        "privilege":"1",
-        "IDMAccessTime" : "2025-05-20 15:25:38",
-        "LabAccessTime" : "2025-05-20 15:30:00",
-        "LabEndTime" : "2025-05-20 16:00:00",
+        "vpn_ip" : 10.0.1.100,
+        "id": 1234567,
+        "matricola" : "1111234",
+        "first_name": "Mario",
+        "last_name": "Rossi",
+        "email" : "mrossi@test.it",
+        "status" : "active",
+        "role" : "student",
+        "lab_id" : 1, 
+        "privilege" : 1,
+        "srl_access_timestamp" : "2025-05-20 15:25:38",
+        "lsb_access_timestamp" : "2025-05-20 15:30:00",
+        "booking_end_time" : "2025-05-20 16:00:00",
+        "wait_timestamp": None,
         "created_at" : "2025-04-23 23:30:00"
-      }
+        }
+     "exists": "true"
     }
 
 
-    http://151.100.59.107:9890/close_connection?vpn_ip=10.0.1.100
+    http://151.100.59.107:9890/user/10.0.1.100/disconnect
 
-    {"close_connection":
-      {
-        "status":"success",
-        "vpn_ip":"10.0.1.100"
-      }
+    {
+        "vpn_ip" : 10.0.1.100,
+        "id": 1234567,
+        "matricola" : "1111234",
+        "first_name": "Mario",
+        "last_name": "Rossi",
+        "email" : "mrossi@test.it",
+        "status" : "insrl_outlsb",
+        "role" : "student",
+        "lab_id" : 1, 
+        "privilege" : 1,
+        "srl_access_timestamp" : "2025-05-20 15:25:38",
+        "lsb_access_timestamp" : "2025-05-20 15:30:00",
+        "booking_end_time" : "2025-05-20 16:00:00",
+        "wait_timestamp": None,
+        "created_at" : "2025-04-23 23:30:00"
     }
 
 
-    http://151.100.59.107:9890/inlab_users
+    http://151.100.59.107:9890/inlab
 
-    {"inlab_users":
-      [
+    [
         {
-          "id":"3","first_name":"Alberto",
-          "last_name":"Bianchi",
-          "email":"abianchi@test.it",
-          "matricola":"3333456",
-          "role":"student",
-          "access_at":"2025-05-20 15:35:15",
-          "vpn_ip":"192.168.0.14"
+            "id": 2345678,
+            "first_name": "Alberto",
+            "last_name": "Bianchi",
+            "email": "abianchi@test.it",
+            "matricola" : "3333456",
+            "role": "student",
+            "status": "insrl_inlsb",
+            "srl_access_timestamp": "2025-05-20 15:30:00",
+            "lsb_access_timestamp": "2025-05-20 15:35:15",
+            "vpn_ip" : "192.168.0.14",
+            "privilege": 2,
+            "lab_id": 1,
+            "wait_timestamp": None,
+            "created_at": "2025-05-13 23:30:00",
+            "booking_end_time": "2025-05-20 16:00:00"
         },
         {
-          "id":"4",
-          "first_name":"Giovanna",
-          "last_name":"Verdi",
-          "email":"gverdi@test.it",
-          "matricola":"4444456",
-          "role":"student",
-          "access_at":"2025-05-20 15:40:20",
-          "vpn_ip":"192.168.0.15"
+            "id": "4",
+            "first_name": "Giovanna",
+            "last_name": "Verdi",
+            "email": "gverdi@test.it",
+            "matricola" : "4444456",
+            "role": "student",
+            "status": "insrl_inlsb",
+            "srl_access_timestamp": "2025-05-20 16:30:00",
+            "lsb_access_timestamp": "2025-05-20 16:35:15",
+            "vpn_ip" : "192.168.0.15",
+            "privilege": 1,
+            "lab_id": 1,
+            "wait_timestamp": None,
+            "created_at": "2025-05-14 22:30:00",
+            "booking_end_time": "2025-05-20 17:00:00"
         }
-      ]
-    }
+    ]
 
 
-    http://151.100.59.107:9890/waiting_users
+    http://151.100.59.107:9890/service/waiting
 
-    {"waiting_users":
-      [
+    [
         {
-          "id":"3",
-          "first_name":"Lucia",
-          "last_name":"Verdi",
-          "email":"lverdi@test.it",
-          "matricola":"2345678",
-          "role":"student",
-          "waiting_since":"2025-05-20 15:45:25"
+            "id": 3456789,
+            "first_name": "Lucia",
+            "last_name": "Verdi",
+            "email": "lverdi@test.it",
+            "matricola" : 2345678,
+            "role": "student",
+            "status": "insrl_outlsb",
+            "privilege": 2,
+            "lab_id": 1,
+            "waiting_since": "2025-05-20 15:45:25",
+            "srl_access_timestamp": "2025-05-20 15:00:00",
+            "lsb_access_timestamp": None,
+            "vpn_ip" : "192.168.0.16",
+            "wait_timestamp": None,
+            "created_at": "2025-05-14 22:30:00",
+            "booking_end_time": None
         },
         {
-          "id":"4",
-          "first_name":"Giovanni",
-          "last_name":"Neri",
-          "email":"gneri@test.it",
-          "matricola":"7777654",
-          "role":"student",
-          "waiting_since":"2025-05-20 15:50:30"
+            "id": 4567890,
+            "first_name": "Giovanni",
+            "last_name": "Neri",
+            "email": "gneri@test.it",
+            "matricola" : "7777654",
+            "role": "student",
+            "status": "insrl_outlsb",
+            "privilege": 2,
+            "lab_id": 1,
+            "waiting_since": "2025-05-20 15:48:30",
+            "srl_access_timestamp": "2025-05-20 15:40:00",
+            "lsb_access_timestamp": None,
+            "vpn_ip" : "192.168.0.17",
+            "wait_timestamp": None,
+            "created_at": "2025-05-12 22:30:00",
+            "booking_end_time": None
         }
-      ]
-    }
+    ]
+    
 
 
-    http://151.100.59.107:9890/bookings
+    http://151.100.59.107:9890/service/bookings
 
-    {"bookings":
-      [
+    [
         {
-          "time_slot":"2025-05-21 14:30:00",
-          "id":"1",
-          "first_name":"Mario",
-          "last_name":"Rossi",
-          "email":"mrossi@test.it",
-          "matricola":"1111234",
-          "role":"studente"
+            "user_id" : 6789012,
+            "service_id": 1,
+            "num_slots": 1,
+            "booked_capacity": 1,
+            "token": "TOKEN_vpuq78",
+            "start_time": "2025-04-20 17:30:00",
+            "end_time": "2025-04-20 18:00:00",
+            "id": 10,
+            "status": "expired",
+            "created_at": "2025-04-14 22:30:00",
         },
         {
-          "time_slot":"2025-05-21 15:30:00",
-          "id":"2",
-          "first_name":"Carla",
-          "last_name":"Bianchi",
-          "email":"cbianchi@test.it",
-          "matricola":"5553456",
-          "role":"studente"
+            "user_id": 7890123,
+            "service_id": 1,
+            "num_slots": 1,
+            "booked_capacity": 1,
+            "token": "TOKEN1",
+            "start_time": "2025-05-20 18:00:00",
+            "end_time": None,
+            "id": 1,
+            "status": "confirmed",
+            "created_at": "2025-05-14 22:30:00"
         }
-      ]
-    }
+    ]
 
 
 ```

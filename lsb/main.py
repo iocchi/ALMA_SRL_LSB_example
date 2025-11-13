@@ -204,36 +204,37 @@ HTML_PAGE = """
         async function fetchBookings() {
             try {
                 const response = await fetch(`${SRL_SERVICE_URL}/service/bookings`);
-                const data = await response.json();
+                const bookings = await response.json();
+                const bookingsListDiv = document.getElementById('bookings-list');
                 
-                if (data.bookings) {
-                    const bookings = data.bookings;
-                    const bookingsListDiv = document.getElementById('bookings-list');
-                    
-                    if (bookings.length === 0) {
-                        bookingsListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No bookings available</p>';
-                    } else {
-                        let listHTML = '<ul style="list-style: none; padding: 0;">';
-                        bookings.forEach(booking => {
-                            const statusColor = booking.status === 'confirmed' ? '#28a745' : booking.status === 'expired' ? '#dc3545' : '#ffc107';
-                            const endTime = booking.end_time ? ` - ${booking.end_time}` : '';
-                            listHTML += `
-                                <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid ${statusColor}; border-radius: 4px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                        <span style="color: #7f5107; font-size: 0.9em;">📅 ${booking.start_time}${endTime}</span>
-                                        <span style="font-weight: bold; font-size: 1.1em;">Booking ID: ${booking.id}</span>
-                                        <span style="color: #6c757d;">User ID: ${booking.user_id}</span>
-                                        <span style="color: #6c757d;">Service ID: ${booking.service_id}</span>
-                                        <span style="color: #6c757d;">Token: ${booking.token}</span>
-                                        <span style="color: ${statusColor}; font-weight: bold;">Stato: ${booking.status}</span>
-                                        <span style="color: #6c757d; font-size: 0.9em;">Slots: ${booking.num_slots}</span>
-                                    </div>
-                                </li>
-                            `;
-                        });
-                        listHTML += '</ul>';
-                        bookingsListDiv.innerHTML = listHTML;
-                    }
+                if (!Array.isArray(bookings)) {
+                    bookingsListDiv.innerHTML = '<p style="text-align: center; color: #dc3545;">Invalid data format received</p>';
+                    return;
+                }
+                
+                if (bookings.length === 0) {
+                    bookingsListDiv.innerHTML = '<p style="text-align: center; color: #6c757d;">No bookings available</p>';
+                } else {
+                    let listHTML = '<ul style="list-style: none; padding: 0;">';
+                    bookings.forEach(booking => {
+                        const statusColor = booking.status === 'confirmed' ? '#28a745' : booking.status === 'expired' ? '#dc3545' : '#ffc107';
+                        const endTime = booking.end_time ? ` - ${booking.end_time}` : '';
+                        listHTML += `
+                            <li style="padding: 12px; margin: 8px 0; background: #f8f9fa; border-left: 4px solid ${statusColor}; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <span style="color: #7f5107; font-size: 0.9em;">📅 ${booking.start_time}${endTime}</span>
+                                    <span style="font-weight: bold; font-size: 1.1em;">Booking ID: ${booking.id}</span>
+                                    <span style="color: #6c757d;">User ID: ${booking.user_id}</span>
+                                    <span style="color: #6c757d;">Service ID: ${booking.service_id}</span>
+                                    <span style="color: #6c757d;">Token: ${booking.token}</span>
+                                    <span style="color: ${statusColor}; font-weight: bold;">Stato: ${booking.status}</span>
+                                    <span style="color: #6c757d; font-size: 0.9em;">Slots: ${booking.num_slots}</span>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    listHTML += '</ul>';
+                    bookingsListDiv.innerHTML = listHTML;
                 }
             } catch (error) {
                 console.error('Error fetching bookings:', error);

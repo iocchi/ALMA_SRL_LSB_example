@@ -190,10 +190,9 @@
         }
 
         async function fetchBookings() {
-            const data = await safeFetchJSON(`${SRL_SERVICE_URL}/service/bookings`);
+            const bookings = await safeFetchJSON(`${SRL_SERVICE_URL}/service/bookings`);
             const div = document.getElementById('bookings-list');
-            if (!data || !data.bookings) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
-            const bookings = data.bookings;
+            if (!Array.isArray(bookings)) { div.innerHTML = '<p style="color:#dc3545; text-align:center;">Invalid data format received</p>'; return; }
             if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
             bookings.forEach(b => { 
