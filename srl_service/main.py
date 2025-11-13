@@ -32,11 +32,11 @@ HTML_PAGE = """
     <h1>Servizi SRL di prova</h1>
     
     <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>GET /user/by-ip/{vpn_ip}</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>PUT /user/{vpn_ip}/disconnect</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>PUT /user/{vpn_ip}/disconnect</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato (Trattandosi di un metodo PUT, il link restituirà "Method Not Allowed" se cliccato direttamente) </p> 
     <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>GET /service/inlab</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
     <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>GET /service/waiting</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
     <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>GET /service/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink6"> <code>PATCH /service/availability/{available}</code> </a> </span>: imposta la disponibilità del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink6"> <code>PATCH /service/availability/{available}</code> </a> </span>: imposta la disponibilità del Lab (Trattandosi di un metodo PATCH, il link restituirà "Method Not Allowed" se cliccato direttamente)</p>
 
 <script>
 
