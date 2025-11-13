@@ -147,8 +147,8 @@
         async function fetchBookings() {
             const data = await safeFetchJSON(`${SRL_SERVICE_URL}/bookings`);
             const div = document.getElementById('bookings-list');
-            if (!data || !data.current_bookings) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
-            const bookings = data.current_bookings;
+            if (!data || !data.bookings) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
+            const bookings = data.bookings;
             if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
             let html = '<ul style="list-style:none;padding:0;">';
             bookings.forEach(b => { html += `<li style="padding:10px;border-left:4px solid #ffc107;margin:8px 0;border-radius:4px;"> ${b.time_slot || ''} &nbsp;&nbsp; <strong>${b.first_name} ${b.last_name}</strong> &nbsp;&nbsp; Matricola: ${b.matricola} &nbsp;&nbsp; &nbsp;&nbsp; E-mail: ${b.email}   &nbsp;&nbsp;  Ruolo: ${b.role}  </li>` });

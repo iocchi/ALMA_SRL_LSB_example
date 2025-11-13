@@ -105,7 +105,7 @@ Esempi:
 
     http://151.100.59.107:9890/bookings
 
-    {"current_bookings":
+    {"bookings":
       [
         {
           "time_slot":"2025-05-11 14:30:00",

@@ -181,8 +181,8 @@ HTML_PAGE = """
                 const response = await fetch(`${SRL_SERVICE_URL}/bookings`);
                 const data = await response.json();
                 
-                if (data.current_bookings) {
-                    const bookings = data.current_bookings;
+                if (data.bookings) {
+                    const bookings = data.bookings;
                     const bookingsListDiv = document.getElementById('bookings-list');
                     
                     if (bookings.length === 0) {

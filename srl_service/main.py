@@ -199,7 +199,7 @@ async def bookings():
                 "role" : "studente"
             }
         ]
-        return {"current_bookings": bookings}
+        return {"bookings": bookings}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
