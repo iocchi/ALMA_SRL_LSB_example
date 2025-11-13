@@ -33,9 +33,10 @@ Esempi:
         "role":"student",
         "ID_lab":"1",
         "privilege":"1",
-        "IDMAccessTime":"2025-06-11 14:30:00",
-        "LabAccessTime":"2025-06-11 15:30:00",
-        "created_at":"2025-05-11 14:30:00"
+        "IDMAccessTime" : "2025-05-20 15:25:38",
+        "LabAccessTime" : "2025-05-20 15:30:00",
+        "LabEndTime" : "2025-05-20 16:00:00",
+        "created_at" : "2025-04-23 23:30:00"
       }
     }
 
@@ -60,7 +61,7 @@ Esempi:
           "email":"abianchi@test.it",
           "matricola":"3333456",
           "role":"student",
-          "access_at":"2025-05-11 14:45:15",
+          "access_at":"2025-05-20 15:35:15",
           "vpn_ip":"192.168.0.14"
         },
         {
@@ -70,7 +71,7 @@ Esempi:
           "email":"gverdi@test.it",
           "matricola":"4444456",
           "role":"student",
-          "access_at":"2025-05-11 15:00:00",
+          "access_at":"2025-05-20 15:40:20",
           "vpn_ip":"192.168.0.15"
         }
       ]
@@ -88,7 +89,7 @@ Esempi:
           "email":"lverdi@test.it",
           "matricola":"2345678",
           "role":"student",
-          "waiting_since":"2025-05-11 14:45:15"
+          "waiting_since":"2025-05-20 15:45:25"
         },
         {
           "id":"4",
@@ -97,7 +98,7 @@ Esempi:
           "email":"gneri@test.it",
           "matricola":"7777654",
           "role":"student",
-          "waiting_since":"2025-05-11 15:00:00"
+          "waiting_since":"2025-05-20 15:50:30"
         }
       ]
     }
@@ -108,7 +109,7 @@ Esempi:
     {"bookings":
       [
         {
-          "time_slot":"2025-05-11 14:30:00",
+          "time_slot":"2025-05-21 14:30:00",
           "id":"1",
           "first_name":"Mario",
           "last_name":"Rossi",
@@ -117,7 +118,7 @@ Esempi:
           "role":"studente"
         },
         {
-          "time_slot":"2025-05-11 15:30:00",
+          "time_slot":"2025-05-21 15:30:00",
           "id":"2",
           "first_name":"Carla",
           "last_name":"Bianchi",
@@ -154,10 +155,11 @@ Tre opzioni disponibili:
 In questa mnodalità è possibile accedere solo tramite *LSB HTML/JS* usando il server SRL Service disponibile all'URL `http://151.100.59.107:9890/`
 
 
-Aprire il file con un browser  `file://<PATH_TO>/lsb/lsb1.html`
+Aprire il file con un browser  `file://<PATH_TO>/lsb/index.html?srl_service_host=151.100.59.107:9890`
 
-Oppure copiare il file `lsb/lsb1.html` in una directory servita da un server web
-e accedere a tale file tramite la URL sel server web.
+Oppure copiare il file `lsb/index.html` in una directory servita da un server web
+e accedere a tale file tramite la URL del server web aggiungendo il parametro 
+`srl_service_host=151.100.59.107:9890`.
 
 
 

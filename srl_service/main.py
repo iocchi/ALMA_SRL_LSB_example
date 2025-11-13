@@ -31,11 +31,23 @@ HTML_PAGE = """
 <body>
     <h1>Servizi SRL di prova</h1>
     
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/user_data?vpn_ip=....</code> </span>: dati dell'utente connesso con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/close_connection?vpn_ip=...</code> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/inlab_users</code> </span>: lista degli utenti attualmente nel Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/waiting_users</code> </span>: lista degli utenti in attesa di entrare in Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <code>/bookings</code> </span>: lista delle prenotazioni del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>/user_data?vpn_ip=....</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>/close_connection?vpn_ip=...</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>/inlab_users</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>/waiting_users</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
+
+<script>
+
+const host = window.location.host; 
+    
+document.getElementById('alink1').href=`//${host}/user_data?vpn_ip=10.0.1.100`;
+document.getElementById('alink2').href=`//${host}/close_connection?vpn_ip=10.0.1.100`;
+document.getElementById('alink3').href=`//${host}/inlab_users`;
+document.getElementById('alink4').href=`//${host}/waiting_users`;
+document.getElementById('alink5').href=`//${host}/bookings`;
+    
+</script>
 
 </body>
 </html>
@@ -68,9 +80,10 @@ async def get_user(vpn_ip: str, request: Request):
             "role" : "student",
             "ID_lab" : "1", 
             "privilege" : "1",
-            "IDMAccessTime" : "2025-06-11 14:30:00",
-            "LabAccessTime" : "2025-06-11 15:30:00",
-            "created_at" : "2025-05-11 14:30:00"
+            "IDMAccessTime" : "2025-05-20 15:25:38",
+            "LabAccessTime" : "2025-05-20 15:30:00",
+            "LabEndTime" : "2025-05-20 16:00:00",
+            "created_at" : "2025-04-23 23:30:00"
         }
         return {"user_data": user_data}
     except ValueError as ve:
@@ -79,8 +92,6 @@ async def get_user(vpn_ip: str, request: Request):
     except Exception as e:
         # Catch-all for unexpected errors
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-
 
 
 @app.get("/close_connection")
@@ -92,6 +103,44 @@ async def close_connection(vpn_ip: str):
     """
     try:
         return {"close_connection": {"status": "success", "vpn_ip" : vpn_ip} }
+    except ValueError as ve:
+        # Handle known validation errors
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        # Catch-all for unexpected errors
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+
+@app.get("/inlab_users")
+async def inlab_users():
+    """
+    Returns the list of users that are inside the lab
+    """
+    try: 
+        inlab_users = [
+            {
+                "id": "3",
+                "first_name": "Alberto",
+                "last_name": "Bianchi",
+                "email": "abianchi@test.it",
+                "matricola" : "3333456",
+                "role": "student",
+                "access_at": "2025-05-20 15:35:15",
+                "vpn_ip" : "192.168.0.14"
+            },
+            {
+                "id": "4",
+                "first_name": "Giovanna",
+                "last_name": "Verdi",
+                "email": "gverdi@test.it",
+                "matricola" : "4444456",
+                "role": "student",
+                "access_at": "2025-05-20 15:40:20",
+                "vpn_ip" : "192.168.0.15"
+            },
+        ]
+        return {"inlab_users": inlab_users}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -115,7 +164,7 @@ async def waiting_users():
                 "email": "lverdi@test.it",
                 "matricola" : "2345678",
                 "role": "student",
-                "waiting_since": "2025-05-11 14:45:15"
+                "waiting_since": "2025-05-20 15:45:25"
             },
             {
                 "id": "4",
@@ -124,46 +173,10 @@ async def waiting_users():
                 "email": "gneri@test.it",
                 "matricola" : "7777654",
                 "role": "student",
-                "waiting_since": "2025-05-11 15:00:00"
+                "waiting_since": "2025-05-20 15:50:30"
             },
         ]
         return {"waiting_users": waiting_users}
-    except ValueError as ve:
-        # Handle known validation errors
-        raise HTTPException(status_code=400, detail=str(ve))
-    except Exception as e:
-        # Catch-all for unexpected errors
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-@app.get("/inlab_users")
-async def inlab_users():
-    """
-    Returns the list of users that are inside the lab
-    """
-    try: 
-        inlab_users = [
-            {
-                "id": "3",
-                "first_name": "Alberto",
-                "last_name": "Bianchi",
-                "email": "abianchi@test.it",
-                "matricola" : "3333456",
-                "role": "student",
-                "access_at": "2025-05-11 14:45:15",
-                "vpn_ip" : "192.168.0.14"
-            },
-            {
-                "id": "4",
-                "first_name": "Giovanna",
-                "last_name": "Verdi",
-                "email": "gverdi@test.it",
-                "matricola" : "4444456",
-                "role": "student",
-                "access_at": "2025-05-11 15:00:00",
-                "vpn_ip" : "192.168.0.15"
-            },
-        ]
-        return {"inlab_users": inlab_users}
     except ValueError as ve:
         # Handle known validation errors
         raise HTTPException(status_code=400, detail=str(ve))
@@ -181,7 +194,7 @@ async def bookings():
     try:
         bookings = [
             {
-                "time_slot" : "2025-05-11 14:30:00",
+                "time_slot" : "2025-05-21 14:30:00",
                 "id" : "1",
                 "first_name" : "Mario",
                 "last_name" : "Rossi",
@@ -190,7 +203,7 @@ async def bookings():
                 "role" : "studente"
             },
             {
-                "time_slot" : "2025-05-11 15:30:00",
+                "time_slot" : "2025-05-21 15:30:00",
                 "id" : "2",
                 "first_name" : "Carla",
                 "last_name" : "Bianchi",

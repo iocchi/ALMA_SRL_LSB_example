@@ -87,10 +87,11 @@ HTML_PAGE = """
                         <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
                             <span><strong>Email:</strong> ${userData.email}</span>
                             <span><strong>Matricola:</strong> ${userData.matricola}</span>
-                            <span><strong>Role:</strong> ${userData.role}</span>
-                            <span><strong>Status:</strong> ${userData.status}</span>
+                            <span><strong>Ruolo:</strong> ${userData.role}</span>
+                            <span><strong>Stato:</strong> ${userData.status}</span>
                             <span><strong>IP:</strong> ${userData.vpn_ip}</span>
-                            <span><strong>You accessed the lab at:</strong> ${userData.LabAccessTime}</span>
+                            <span><strong>Sei entrato nel Lab a:</strong> ${userData.LabAccessTime}</span>
+                            <span><strong>La connessione sarà attiva fino a:</strong> ${userData.LabEndTime}</span>
                         </div>
                     `;
                 }

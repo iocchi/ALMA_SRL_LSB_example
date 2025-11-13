@@ -56,8 +56,14 @@
     <script>
         // Browser-facing SRL service base URL (static file should use localhost)
 
+        var SRL_SERVICE_URL = 'http://localhost:8000';   // accesso server locale
 
-        const SRL_SERVICE_URL = 'http://localhost:8000';   // accesso server locale
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const srl_url = urlParams.get('srl_service_host');
+        console.log(srl_url)
+        if (srl_url != null)
+            SRL_SERVICE_URL = 'http://'+srl_url;
 
         async function safeFetchJSON(url) {
             try {
@@ -112,10 +118,14 @@
                 <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;"> 
                     <span><strong>Email:</strong> ${userData.email}</span>
                     <span><strong>Matricola:</strong> ${userData.matricola}</span>
-                    <span><strong>Role:</strong> ${userData.role}</span>
-                    <span><strong>Status:</strong> ${userData.status}</span>
+                    <span><strong>Ruolo:</strong> ${userData.role}</span>
+                    <span><strong>Stato:</strong> ${userData.status}</span>
                     <span><strong>IP:</strong> ${userData.vpn_ip}</span>
-                    <span><strong>Sei entrato nel Lab alle:</strong> ${userData.LabAccessTime}</span>
+                    <span><strong>Sei entrato nel Lab a:</strong> ${userData.LabAccessTime}</span>
+                    <span><strong>La connessione sarà attiva fino a:</strong> ${userData.LabEndTime}</span>
+
+
+
                 </div>
             `;
         }
