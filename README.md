@@ -24,7 +24,7 @@ Esempi:
 
 ```
 
-    http://151.100.59.107:9890/user/by-ip/10.0.1.100
+    http://151.100.59.107:9890/user/by-ip/10.0.1.100   GET
     
     {"user": 
       {
@@ -48,7 +48,7 @@ Esempi:
     }
 
 
-    http://151.100.59.107:9890/user/10.0.1.100/disconnect
+    http://151.100.59.107:9890/user/10.0.1.100/disconnect   PUT
 
     {
         "vpn_ip" : 10.0.1.100,
@@ -69,7 +69,7 @@ Esempi:
     }
 
 
-    http://151.100.59.107:9890/inlab
+    http://151.100.59.107:9890/inlab   GET
 
     [
         {
@@ -109,7 +109,7 @@ Esempi:
     ]
 
 
-    http://151.100.59.107:9890/service/waiting
+    http://151.100.59.107:9890/service/waiting  GET
 
     [
         {
@@ -152,7 +152,7 @@ Esempi:
     
 
 
-    http://151.100.59.107:9890/service/bookings
+    http://151.100.59.107:9890/service/bookings   GET
 
     [
         {
@@ -181,6 +181,31 @@ Esempi:
         }
     ]
 
+    
+    http://151.100.59.107:9890/service/availability/true   PATCH
+
+    {
+      "name": "Dashboard Esperimento LSB di prova",
+      "creator_id": 3,
+      "description_ita": "Router remoto per test",
+      "description_eng": "Remote router for lab tests",
+      "opening_time": "00:00:00",
+      "closing_time": "23:59:00",
+      "under_maintenance": "false",
+      "use_bookings": "false",
+      "slot_duration": 15,
+      "max_capacity": 1,
+      "max_num_bookable_slots": 1,
+      "spectator_mode": "false",
+      "spectator_mode_link": "",
+      "available": true,
+      "ip": "10.112.0.1",
+      "port": "5000",
+      "protocol": "tcp",
+      "entry_point": "",
+      "id": 1,
+      "created_at": "2025-02-14 22:30:00"
+    }
 
 ```
 
