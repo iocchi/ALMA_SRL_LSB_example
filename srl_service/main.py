@@ -91,6 +91,13 @@ async def index():
     return HTMLResponse(content=HTML_PAGE)
 
 
+@app.get("/get_my_vpn_ip")
+def get_my_vpn_ip(request: Request):
+    vpn_ip = request.client.host
+    print(f"get_my_vpn_ip: {vpn_ip}")
+    return { "vpn_ip": vpn_ip }
+
+
 @app.get("/user/by-ip/{vpn_ip}")
 async def get_user(vpn_ip: str, request: Request):
     """
