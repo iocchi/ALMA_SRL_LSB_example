@@ -69,7 +69,7 @@ Esempi:
     }
 
 
-    http://151.100.59.107:9890/inlab   GET
+    http://151.100.59.107:9890/service/inlab   GET
 
     [
         {
@@ -345,10 +345,15 @@ Nota: gli esempi che seguono usano l'accesso al server SRL locale tramite `local
 
 Usare la URL `http://localhost:8000/<service_name>` (example:  `http://localhost:8000/inlab_users`)
 
-Esempio da linea di comando:
+Esempi da linea di comando:
+
 ```bash
-curl http://localhost:8000/inlab_users
-curl http://localhost:8000/user_data?vpn_ip=192.168.1.100
+curl http://localhost:8000/user/by-ip/10.0.1.100
+curl -X PUT http://localhost:8000/user/10.0.1.100/disconnect
+curl http://localhost:8000/service/inlab
+curl http://localhost:8000/service/waiting
+curl http://localhost:8000/service/bookings
+curl -X PATCH http://localhost:8000/service/availability/true
 ```
 
 

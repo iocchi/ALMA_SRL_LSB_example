@@ -94,6 +94,21 @@
         }
 
 
+        async function getVPNIP() {
+            try {
+                // const data = await safeFetchJSON('http://localhost:8000/get_my_vpn_ip');
+                const data = await safeFetchJSON(SRL_SERVICE_URL + '/get_my_vpn_ip');
+
+
+                console.log("Client VPN IP obtained: " + data.vpn_ip);
+                return data.vpn_ip;
+
+            } catch (error) {
+                console.warn("VPN IP service failed:", error);
+                return "0.0.0.0"
+            }
+            
+        }
 
         // Function to fetch and display the client's IP address
         async function getClientIp() {
@@ -119,8 +134,8 @@
                 } catch (fallbackError) {
                     console.error("All IP services failed:", fallbackError);
                     // Use a default test IP for development
-                    console.warn("Using default test IP: 10.0.1.100");
-                    return "10.0.1.100";
+                    console.warn("Using default test IP: 0.0.0.0");
+                    return "0.0.0.0";
                 }
             }
         }
@@ -128,8 +143,8 @@
 
 
         async function fetchUserData() {
-            const vpnIp = await getClientIp();
-            console.log('Client IP obtained:', vpnIp);
+            const vpnIp = await getVPNIP();
+            console.log('Client VPN IP:', vpnIp);
             const url = `${SRL_SERVICE_URL}/user/by-ip/${vpnIp}`;
             console.log('Fetching user data from:', url);
             const data = await safeFetchJSON(url);
