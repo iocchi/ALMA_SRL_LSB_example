@@ -17,7 +17,7 @@ I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP (metodi 
 - **GET** `/service/bookings` : lista delle prenotazioni del Lab
 - **PATCH** `/service/availability/{available}` : imposta la disponibilità del Lab (true/false)
 
-I servizi si possono provare accedendo alla pagina `http://151.100.59.107:9890/`
+I servizi si possono provare accedendo alla pagina [`http://151.100.59.107:9890/`](http://151.100.59.107:9890/)
 
 
 Esempi:
@@ -343,7 +343,7 @@ Nota: gli esempi che seguono usano l'accesso al server SRL locale tramite `local
 
 **SRL API** 
 
-Usare la URL `http://localhost:8000/<service_name>` (example:  `http://localhost:8000/inlab_users`)
+Usare la URL `http://localhost:8000/<service_name>`
 
 Esempi da linea di comando:
 
