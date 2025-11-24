@@ -127,6 +127,8 @@ async def get_user(vpn_ip: str, request: Request):
             "wait_timestamp": None,
             "created_at" : "2025-04-23 23:30:00"
         }
+        print(f"user data {vpn_ip}")
+
         return {"user": user,"exists": "true"}
     except ValueError as ve:
         # Handle known validation errors
@@ -161,6 +163,7 @@ async def disconnect(vpn_ip: str):
         "wait_timestamp": None,
         "created_at" : "2025-04-23 23:30:00"
         }
+        print(f"disconnected user: {vpn_ip}")
         return disconnected_user
     except ValueError as ve:
         # Handle known validation errors
@@ -212,6 +215,7 @@ async def inlab():
                 "booking_end_time": "2025-05-20 17:00:00"
             }
         ]
+        print("inlab users")
         return inlab_users
     except ValueError as ve:
         # Handle known validation errors
@@ -266,6 +270,7 @@ async def waiting():
                 "booking_end_time": None
             },
         ]
+        print(f"waiting users")
         return waiting_users
     except ValueError as ve:
         # Handle known validation errors
@@ -309,6 +314,7 @@ async def bookings():
                 "created_at": "2025-05-14 22:30:00"
             }
         ]
+        print("bookings")
         return bookings
     except ValueError as ve:
         # Handle known validation errors
@@ -348,6 +354,7 @@ async def set_availability(available: bool):
             "id": 1,
             "created_at": "2025-02-14 22:30:00"
         }
+        print(f"lab available {available}")
         return data
     except ValueError as ve:
         # Handle known validation errors

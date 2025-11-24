@@ -323,6 +323,18 @@ Parametri
 - `port`: Porta del server http
 
 
+
+
+**Avvio LSB PHP:**
+```bash
+cd lsb
+php -S 0.0.0.0:5090
+```
+
+Parametri
+- `port`: Porta del server php
+
+
 **Esempio con parametri personalizzati:**
 ```bash
 # SRL su porta 9000
