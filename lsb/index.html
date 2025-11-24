@@ -96,9 +96,7 @@
 
         async function getVPNIP() {
             try {
-                // const data = await safeFetchJSON('http://localhost:8000/get_my_vpn_ip');
-                const data = await safeFetchJSON(SRL_SERVICE_URL + '/get_my_vpn_ip');
-
+                const data = await safeFetchJSON(SRL_SERVICE_URL + '/api/service/myip');
 
                 console.log("Client VPN IP obtained: " + data.vpn_ip);
                 return data.vpn_ip;
@@ -145,7 +143,7 @@
         async function fetchUserData() {
             const vpnIp = await getVPNIP();
             console.log('Client VPN IP:', vpnIp);
-            const url = `${SRL_SERVICE_URL}/user/by-ip/${vpnIp}`;
+            const url = `${SRL_SERVICE_URL}/api/user/by-ip/${vpnIp}`;
             console.log('Fetching user data from:', url);
             const data = await safeFetchJSON(url);
             const userInfoDiv = document.getElementById('user-info');
@@ -183,7 +181,7 @@
         }
 
         async function fetchWaitingUsers() {
-            const users = await safeFetchJSON(`${SRL_SERVICE_URL}/service/waiting`);
+            const users = await safeFetchJSON(`${SRL_SERVICE_URL}/api/service/waiting`);
             const div = document.getElementById('waiting-users-list');
             if (!Array.isArray(users)) { div.innerHTML = '<p style="color:#dc3545; text-align:center;">Invalid data format received</p>'; return; }
             if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users waiting</p>'; return; }
@@ -194,7 +192,7 @@
         }
 
         async function fetchInLabUsers() {
-            const users = await safeFetchJSON(`${SRL_SERVICE_URL}/service/inlab`);
+            const users = await safeFetchJSON(`${SRL_SERVICE_URL}/api/service/inlab`);
             const div = document.getElementById('inlab-users-list');
             if (!Array.isArray(users)) { div.innerHTML = '<p style="color:#dc3545; text-align:center;">Invalid data format received</p>'; return; }
             if (users.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No users in lab</p>'; return; }
@@ -205,7 +203,7 @@
         }
 
         async function fetchBookings() {
-            const bookings = await safeFetchJSON(`${SRL_SERVICE_URL}/service/bookings`);
+            const bookings = await safeFetchJSON(`${SRL_SERVICE_URL}/api/service/bookings`);
             const div = document.getElementById('bookings-list');
             if (!Array.isArray(bookings)) { div.innerHTML = '<p style="color:#dc3545; text-align:center;">Invalid data format received</p>'; return; }
             if (bookings.length === 0) { div.innerHTML = '<p style="color:#6c757d; text-align:center;">No bookings</p>'; return; }
@@ -227,7 +225,7 @@
                 const msg = document.getElementById('disconnect-message');
                 btn.disabled = true; btn.style.background = '#6c757d'; btn.style.cursor = 'not-allowed';
                 
-                const response = await fetch(`${SRL_SERVICE_URL}/user/${vpnIp}/disconnect`, { method: 'PUT' });
+                const response = await fetch(`${SRL_SERVICE_URL}/api/user/${vpnIp}/disconnect`, { method: 'PUT' });
                 const data = await response.json();
                 
                 // Show popup with response data
@@ -262,7 +260,7 @@
         
         async function setLabAvailability(available) {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/service/availability/${available}`, { method: 'PATCH' });
+                const response = await fetch(`${SRL_SERVICE_URL}/api/service/availability/${available}`, { method: 'PATCH' });
                 const data = await response.json();
                 
                 // Show popup with response data

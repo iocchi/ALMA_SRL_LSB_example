@@ -37,7 +37,7 @@ function safeFetchJSON($url) {
 }
 
 function getVPNIP() {
-    $data = safeFetchJSON('/get_my_vpn_ip');
+    $data = safeFetchJSON('/api/service/myip');
     return $data['vpn_ip'] ?? '0.0.0.0';
 }
 
@@ -45,7 +45,7 @@ function getVPNIP() {
 
 // Funzione per recuperare i dati dell'utente
 function fetchUserData($vpnIp) {
-    $data = safeFetchJSON("/user/by-ip/{$vpnIp}");
+    $data = safeFetchJSON("/api/user/by-ip/{$vpnIp}");
     if (!isset($data['user'])) {
         return ['error' => true, 'message' => '<p style="color: #6c757d;">No user data available for IP: ' . htmlspecialchars($vpnIp) . '</p>'];
     }
@@ -78,7 +78,7 @@ function fetchUserData($vpnIp) {
 
 // Funzione per recuperare gli utenti in attesa
 function fetchWaitingUsers() {
-    $users = safeFetchJSON('/service/waiting');
+    $users = safeFetchJSON('/api/service/waiting');
     if (!is_array($users) || count($users) === 0) {
         return '<p style="color:#6c757d; text-align:center;">No users waiting</p>';
     }
@@ -92,7 +92,7 @@ function fetchWaitingUsers() {
 
 // Funzione per recuperare gli utenti nel lab
 function fetchInLabUsers() {
-    $users = safeFetchJSON('/service/inlab');
+    $users = safeFetchJSON('/api/service/inlab');
     if (!is_array($users) || count($users) === 0) {
         return '<p style="color:#6c757d; text-align:center;">No users in lab</p>';
     }
@@ -107,7 +107,7 @@ function fetchInLabUsers() {
 
 // Funzione per recuperare le prenotazioni
 function fetchBookings() {
-    $bookings = safeFetchJSON('/service/bookings');
+    $bookings = safeFetchJSON('/api/service/bookings');
     if (!is_array($bookings) || count($bookings) === 0) {
         return '<p style="color:#6c757d; text-align:center;">No bookings</p>';
     }

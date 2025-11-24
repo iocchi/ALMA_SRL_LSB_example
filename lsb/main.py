@@ -84,7 +84,7 @@ HTML_PAGE = """
         async function fetchUserData() {
             try {
                 const vpn_ip = "{{ client_ip }}";
-                const response = await fetch(`${SRL_SERVICE_URL}/user/by-ip/${vpn_ip}`);
+                const response = await fetch(`${SRL_SERVICE_URL}/api/user/by-ip/${vpn_ip}`);
                 const data = await response.json();
                 
                 if (data.user) {
@@ -125,7 +125,7 @@ HTML_PAGE = """
         // Fetch waiting users from SRL service
         async function fetchWaitingUsers() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/service/waiting`);
+                const response = await fetch(`${SRL_SERVICE_URL}/api/service/waiting`);
                 const users = await response.json();
                 
                 const waitingListDiv = document.getElementById('waiting-users-list');
@@ -163,7 +163,7 @@ HTML_PAGE = """
         // Fetch in-lab users from SRL service
         async function fetchInLabUsers() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/service/inlab`);
+                const response = await fetch(`${SRL_SERVICE_URL}/api/service/inlab`);
                 const users = await response.json();
                 
                 const inlabListDiv = document.getElementById('inlab-users-list');
@@ -203,7 +203,7 @@ HTML_PAGE = """
         // Fetch bookings from SRL service
         async function fetchBookings() {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/service/bookings`);
+                const response = await fetch(`${SRL_SERVICE_URL}/api/service/bookings`);
                 const bookings = await response.json();
                 const bookingsListDiv = document.getElementById('bookings-list');
                 
@@ -254,7 +254,7 @@ HTML_PAGE = """
                 disconnectBtn.style.background = '#6c757d';
                 disconnectBtn.style.cursor = 'not-allowed';
                 
-                const response = await fetch(`${SRL_SERVICE_URL}/user/${vpn_ip}/disconnect`, {
+                const response = await fetch(`${SRL_SERVICE_URL}/api/user/${vpn_ip}/disconnect`, {
                     method: 'PUT'
                 });
                 
@@ -310,7 +310,7 @@ HTML_PAGE = """
         
         async function setLabAvailability(available) {
             try {
-                const response = await fetch(`${SRL_SERVICE_URL}/service/availability/${available}`, {
+                const response = await fetch(`${SRL_SERVICE_URL}/api/service/availability/${available}`, {
                     method: 'PATCH'
                 });
                 

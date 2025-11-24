@@ -10,12 +10,13 @@ I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP (metodi 
 
 ## Servizi disponibili
 
-- **GET** `/user/by-ip/{vpn_ip}` : dati dell'utente connesso con VPN IP specificato
-- **PUT** `/user/{vpn_ip}/disconnect` : segnale di chiusura della connessione dell'utente con VPN IP specificato
-- **GET** `/service/inlab` : lista degli utenti attualmente nel Lab
-- **GET** `/service/waiting` : lista degli utenti in attesa di entrare in Lab
-- **GET** `/service/bookings` : lista delle prenotazioni del Lab
-- **PATCH** `/service/availability/{available}` : imposta la disponibilità del Lab (true/false)
+- **GET** `/api/user/by-ip/{vpn_ip}` : dati dell'utente connesso con VPN IP specificato
+- **PUT** `/api/user/{vpn_ip}/disconnect` : segnale di chiusura della connessione dell'utente con VPN IP specificato
+- **GET** `/api/service/myip` : lista delle prenotazioni del Lab
+- **GET** `/api/service/inlab` : lista degli utenti attualmente nel Lab
+- **GET** `/api/service/waiting` : lista degli utenti in attesa di entrare in Lab
+- **GET** `/api/service/bookings` : lista delle prenotazioni del Lab
+- **PATCH** `/api/service/availability/{available}` : imposta la disponibilità del Lab (true/false)
 
 I servizi si possono provare accedendo alla pagina [`http://151.100.59.107:9890/`](http://151.100.59.107:9890/)
 
@@ -24,7 +25,7 @@ Esempi:
 
 ```
 
-    http://151.100.59.107:9890/user/by-ip/10.0.1.100   GET
+    http://151.100.59.107:9890/api/user/by-ip/10.0.1.100   GET
     
     {"user": 
       {
@@ -48,7 +49,7 @@ Esempi:
     }
 
 
-    http://151.100.59.107:9890/user/10.0.1.100/disconnect   PUT
+    http://151.100.59.107:9890/api/user/10.0.1.100/disconnect   PUT
 
     {
         "vpn_ip" : 10.0.1.100,
@@ -69,7 +70,14 @@ Esempi:
     }
 
 
-    http://151.100.59.107:9890/service/inlab   GET
+    http://151.100.59.107:9890/api/service/myip   GET
+
+    {
+        "vpn_ip":"10.0.1.100"
+    }
+
+
+    http://151.100.59.107:9890/api/service/inlab   GET
 
     [
         {
@@ -109,7 +117,7 @@ Esempi:
     ]
 
 
-    http://151.100.59.107:9890/service/waiting  GET
+    http://151.100.59.107:9890/api/service/waiting  GET
 
     [
         {
@@ -152,7 +160,7 @@ Esempi:
     
 
 
-    http://151.100.59.107:9890/service/bookings   GET
+    http://151.100.59.107:9890/api/service/bookings   GET
 
     [
         {
@@ -182,7 +190,7 @@ Esempi:
     ]
 
     
-    http://151.100.59.107:9890/service/availability/true   PATCH
+    http://151.100.59.107:9890/api/service/availability/true   PATCH
 
     {
       "name": "Dashboard Esperimento LSB di prova",
@@ -362,16 +370,17 @@ Usare la URL `http://localhost:8000/<service_name>`
 Esempi da linea di comando:
 
 ```bash
-curl http://localhost:8000/user/by-ip/10.0.1.100
-curl -X PUT http://localhost:8000/user/10.0.1.100/disconnect
-curl http://localhost:8000/service/inlab
-curl http://localhost:8000/service/waiting
-curl http://localhost:8000/service/bookings
-curl -X PATCH http://localhost:8000/service/availability/true
+curl http://localhost:8000/api/user/by-ip/10.0.1.100
+curl -X PUT http://localhost:8000/api/user/10.0.1.100/disconnect
+curl http://localhost:8000/api/service/myip
+curl http://localhost:8000/api/service/inlab
+curl http://localhost:8000/api/service/waiting
+curl http://localhost:8000/api/service/bookings
+curl -X PATCH http://localhost:8000/api/service/availability/true
 ```
 
 
-## Accesso ai servizi tramite LSB Python HTML/JS o HTML/PHP
+## Accesso ai servizi tramite LSB Python, HTML/JS o HTML/PHP
 
 Usare un browser per accedere a questi URL
 
@@ -395,7 +404,8 @@ Usando l'ambiente docker, lo script `./run-containers.sh` usa i valori di defaul
 |-----------|-------------|---------|---------|
 | `SRL_PORT` | Porta esterna per accedere al servizio SRL | `8000` | `SRL_PORT=9000` |
 | `LSB_PORT` | Porta esterna per accedere al servizio LSB Python | `5000` | `LSB_PORT=6000` |
-| `LSB_STATIC_PORT` | Porta esterna per accedere al servizio LSB Static | `8080` | `LSB_STATIC_PORT=9090` |
+| `LSB_HTTP_PORT` | Porta esterna per accedere al servizio LSB HTML/JS | `5080` | `LSB_HTTP_PORT=9080` |
+| `LSB_PHP_PORT` | Porta esterna per accedere al servizio LSB PHP | `5090` | `LSB_PHP_PORT=9090` |
 | `SRL_CONNECT_HOST` | Host a cui LSB si connette per raggiungere SRL | `srl_service` | `SRL_CONNECT_HOST=151.100.59.107` |
 | `SRL_CONNECT_PORT` | Porta a cui LSB si connette per raggiungere SRL | `8000` | `SRL_CONNECT_PORT=9000` |
 
@@ -407,16 +417,17 @@ docker-compose up
 ```
 - SRL disponibile su: `http://localhost:8000`
 - LSB Python disponibile su: `http://localhost:5000`
-- LSB Static disponibile su: `http://localhost:8080/index.html`
+- LSB HTML/JS disponibile su: `http://localhost:5080/index.html`
+- LSB PHO disponibile su: `http://localhost:5090/index.php`
 - LSB si connette a SRL tramite rete Docker interna
 
 **2. Porte personalizzate:**
 ```bash
-SRL_PORT=9000 LSB_PORT=6000 LSB_STATIC_PORT=9090 docker-compose up
+SRL_PORT=9000 LSB_PORT=6000 LSB_HTTP_PORT=9090 docker-compose up
 ```
 - SRL disponibile su: `http://localhost:9000`
 - LSB Python disponibile su: `http://localhost:6000`
-- LSB Static disponibile su: `http://localhost:9090/index.html`
+- LSB HTML/JS disponibile su: `http://localhost:9090/index.html`
 
 **3. Solo servizio SRL con porta personalizzata:**
 ```bash
@@ -428,7 +439,7 @@ SRL_PORT=9000 ./run-containers.sh srl_service
 ```bash
 LSB_PORT=6000 SRL_CONNECT_HOST=151.100.59.107 SRL_CONNECT_PORT=9890 ./run-containers.sh lsb_service
 ```
-- LSB disponibile su: `http://localhost:6000`
+- LSB Python disponibile su: `http://localhost:6000`
 - LSB si connette a SRL su `151.100.59.107:9890`
 
 **5. LSB si connette a SRL sulla macchina host:**

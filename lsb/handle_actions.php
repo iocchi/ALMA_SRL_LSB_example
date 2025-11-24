@@ -50,24 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     switch ($action) {
         case 'disconnect':
-            // Chiama l'endpoint /user/{vpnIp}/disconnect (metodo PUT)
-            $result = safeApiCall("/user/{$vpnIp}/disconnect", 'PUT');
+            $result = safeApiCall("/api/user/{$vpnIp}/disconnect", 'PUT');
             if ($result['success']) {
                 $redirectStatus = 'disconnected';
             }
             break;
 
         case 'set_available':
-            // Chiama l'endpoint /service/availability/true (metodo PATCH)
-            $result = safeApiCall("/service/availability/true", 'PATCH');
+            $result = safeApiCall("/api/service/availability/true", 'PATCH');
             if ($result['success']) {
                 $redirectStatus = 'availability_true';
             }
             break;
 
         case 'set_unavailable':
-            // Chiama l'endpoint /service/availability/false (metodo PATCH)
-            $result = safeApiCall("/service/availability/false", 'PATCH');
+            $result = safeApiCall("/api/service/availability/false", 'PATCH');
             if ($result['success']) {
                 $redirectStatus = 'availability_false';
             }

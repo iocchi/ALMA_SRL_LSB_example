@@ -31,26 +31,28 @@ HTML_PAGE = """
 <body>
     <h1>Servizi SRL di prova</h1>
     
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>GET /user/by-ip/{vpn_ip}</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>PUT /user/{vpn_ip}/disconnect</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato. </p> 
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>GET /service/inlab</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>GET /service/waiting</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>GET /service/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
-    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink6"> <code>PATCH /service/availability/{available}</code> </a> </span>: imposta la disponibilità del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink1"> <code>GET /api/user/by-ip/{vpn_ip}</code> </a> </span>: dati dell'utente connesso con VPN IP specificato </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;">  <a href="#" id="alink2"> <code>PUT /api/user/{vpn_ip}/disconnect</code> </a> </span>: segnale di chiusura della connessione dell'utente con VPN IP specificato. </p> 
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink3"> <code>GET /api/service/inlab</code> </a> </span>: lista degli utenti attualmente nel Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink4"> <code>GET /api/service/myip</code> </a> </span>: IP del client </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink5"> <code>GET /api/service/waiting</code> </a> </span>: lista degli utenti in attesa di entrare in Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink6"> <code>GET /api/service/bookings</code> </a> </span>: lista delle prenotazioni del Lab </p>
+    <p> <span style="color: #0807a5;font-size: 1.2em;"> <a href="#" id="alink7"> <code>PATCH /api/service/availability/{available}</code> </a> </span>: imposta la disponibilità del Lab </p>
 
 <script>
 
 const host = window.location.host; 
     
-document.getElementById('alink1').href=`//${host}/user/by-ip/10.0.1.100`;
-document.getElementById('alink3').href=`//${host}/service/inlab`;
-document.getElementById('alink4').href=`//${host}/service/waiting`;
-document.getElementById('alink5').href=`//${host}/service/bookings`;
+document.getElementById('alink1').href=`//${host}/api/user/by-ip/10.0.1.100`;
+document.getElementById('alink3').href=`//${host}/api/service/inlab`;
+document.getElementById('alink4').href=`//${host}/api/service/myip`;
+document.getElementById('alink5').href=`//${host}/api/service/waiting`;
+document.getElementById('alink6').href=`//${host}/api/service/bookings`;
 
 // Handle PUT endpoint
 document.getElementById('alink2').addEventListener('click', async (e) => {
     e.preventDefault();
-    const url = `http://${host}/user/10.0.1.100/disconnect`;
+    const url = `http://${host}/api/user/10.0.1.100/disconnect`;
     try {
         const response = await fetch(url, { method: 'PUT' });
         const data = await response.json();
@@ -61,9 +63,9 @@ document.getElementById('alink2').addEventListener('click', async (e) => {
 });
 
 // Handle PATCH endpoint
-document.getElementById('alink6').addEventListener('click', async (e) => {
+document.getElementById('alink7').addEventListener('click', async (e) => {
     e.preventDefault();
-    const url = `http://${host}/service/availability/true`;
+    const url = `http://${host}/api/service/availability/true`;
     try {
         const response = await fetch(url, { method: 'PATCH' });
         const data = await response.json();
@@ -91,14 +93,14 @@ async def index():
     return HTMLResponse(content=HTML_PAGE)
 
 
-@app.get("/get_my_vpn_ip")
-def get_my_vpn_ip(request: Request):
+@app.get("/api/service/myip")
+def get_my_ip(request: Request):
     vpn_ip = request.client.host
-    print(f"get_my_vpn_ip: {vpn_ip}")
+    print(f"myip: {vpn_ip}")
     return { "vpn_ip": vpn_ip }
 
 
-@app.get("/user/by-ip/{vpn_ip}")
+@app.get("/api/user/by-ip/{vpn_ip}")
 async def get_user(vpn_ip: str, request: Request):
     """
     Retrieve user data.
@@ -138,7 +140,7 @@ async def get_user(vpn_ip: str, request: Request):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.put("/user/{vpn_ip}/disconnect")
+@app.put("/api/user/{vpn_ip}/disconnect")
 async def disconnect(vpn_ip: str):
     """
     Notifies SRL that the connection with the LSB has being closed by the user.
@@ -173,7 +175,7 @@ async def disconnect(vpn_ip: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.get("/service/inlab")
+@app.get("/api/service/inlab")
 async def inlab():
     """
     Returns the list of users that are inside the lab
@@ -226,7 +228,7 @@ async def inlab():
 
 
 
-@app.get("/service/waiting")
+@app.get("/api/service/waiting")
 async def waiting():
     """
     Returns the list of users that are outside the lab and are waiting to enter
@@ -281,7 +283,7 @@ async def waiting():
 
 
 
-@app.get("/service/bookings")
+@app.get("/api/service/bookings")
 async def bookings():
     """
     Returns the list of bookings available for the lab.
@@ -324,7 +326,7 @@ async def bookings():
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.patch("/service/availability/{available}")
+@app.patch("/api/service/availability/{available}")
 async def set_availability(available: bool):
     """
     Updates the availability status of the lab service.
