@@ -216,9 +216,11 @@ Esempi:
 
 ## Client lato LSB per accedere ai servizi offerti da SRL
 
-- **LSB Python**: Dashboard real-time con Flask e Socket.IO 
+- **LSB Python**: Dashboard Flask e Socket.IO 
 
-- **LSB HTML/JS**: Dashboard HTML/Javascript self-contained
+- **LSB HTML/JS**: Dashboard HTML/Javascript
+
+- **LSB HTML/PHP**: Dashboard HTML/PHP
 
 - **Linea di comando**: Accesso ai servizi tramite comandi di sistema
 
@@ -251,7 +253,7 @@ e accedere a tale file tramite la URL del server web aggiungendo il parametro
 Nota: la prima volta che si lancia il sistema, viene eseguita una sessione di creazione delle immagini docker che richiede alcuni minuti.
 
 
-**Eseguire tutti i servizi (SRL + LSB Python + LSB HTML/JS):**
+**Eseguire tutti i servizi (SRL + LSB Python + LSB HTML/JS + LSB PHP):**
 
 ```bash
 ./run-containers.sh
@@ -323,7 +325,7 @@ Parametri
 - `port`: Porta del server http
 
 
-
+Per LSB PHP, installare anche `php`
 
 **Avvio LSB PHP:**
 ```bash
@@ -369,7 +371,7 @@ curl -X PATCH http://localhost:8000/service/availability/true
 ```
 
 
-## Accesso ai servizi tramite LSB Python o LSB HTML/JS
+## Accesso ai servizi tramite LSB Python HTML/JS o HTML/PHP
 
 Usare un browser per accedere a questi URL
 
@@ -377,7 +379,9 @@ Usare un browser per accedere a questi URL
 
 - **LSB HTML/JS Dashboard**: `http://localhost:5080/index.html`
 
-I file `lsb/main.py` e `lsb/index.html` contengono degli esempi di accesso al server dei servizi SRL usando rispettivamente Python e Javascript.
+- **LSB PHP Dashboard**: `http://localhost:5090/index.php`
+
+I file `lsb/main.py`, `lsb/index.html`, `lsb/index.php` contengono degli esempi di accesso al server dei servizi SRL usando rispettivamente Python e Javascript.
 
 
 

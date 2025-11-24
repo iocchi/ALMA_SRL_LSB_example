@@ -20,7 +20,7 @@ HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LSB Python</title>
+    <title>LSB Python Flask</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <style>
@@ -32,7 +32,7 @@ HTML_PAGE = """
     </style>
 </head>
 <body>
-    <h1>🔬 Dashboard Esperimento LSB di prova</h1>
+    <h1>🔬 Dashboard Esperimento LSB di prova (Python Flask)</h1>
 
     <div id="user-data" style="text-align: center; margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 8px;">
         <div id="user-info">Loading user data...</div>

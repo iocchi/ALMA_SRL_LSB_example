@@ -39,7 +39,6 @@ function safeFetchJSON($url) {
 function getVPNIP() {
     $data = safeFetchJSON('/get_my_vpn_ip');
     return $data['vpn_ip'] ?? '0.0.0.0';
-    // return "10.8.0.2"; // Valore fittizio per la dimostrazione
 }
 
 
@@ -139,7 +138,7 @@ $bookingsHTML = fetchBookings();
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LSB HTML/JS</title>
+    <title>LSB HTML/PHP</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <style>
