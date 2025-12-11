@@ -156,11 +156,11 @@ async def main():
     """Avvia entrambi i server (WebSocket e HTTP)."""
     
     # Avvio del server WebSocket
-    ws_server = await websockets.serve(websocket_handler, "localhost", WEBSOCKET_PORT)
-    print(f"Server WebSocket avviato su ws://localhost:{WEBSOCKET_PORT}")
+    ws_server = await websockets.serve(websocket_handler, "0.0.0.0", WEBSOCKET_PORT)
+    print(f"Server WebSocket avviato su ws://0.0.0.0:{WEBSOCKET_PORT}")
 
     # Avvio del server HTTP in un thread
-    print(f"Server HTTP avviato su http://localhost:{HTTP_PORT} per servire index.html")
+    print(f"Server HTTP avviato su http://0.0.0.0:{HTTP_PORT} per servire index.html")
     httpd = TCPServer(("", HTTP_PORT), CustomHTTPRequestHandler)
     import threading
     http_thread = threading.Thread(target=httpd.serve_forever, daemon=True)

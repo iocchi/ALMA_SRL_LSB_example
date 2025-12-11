@@ -200,6 +200,7 @@
         }
 
         function handleIncomingMessage(data) {
+            console.log(data)
             if (data.type === 'full_update') {
                 // Aggiornamento completo dei dati statici
                 const context = data.context;
