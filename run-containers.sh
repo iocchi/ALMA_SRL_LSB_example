@@ -6,12 +6,12 @@
 set -e  # Exit immediately on errors
 
 # Default values (can be overridden by environment variables)
-#export SRL_HOST=srl   # local docker service
-#export SRL_PORT=5000
+export SRL_HOST=srl   # local docker service
+export SRL_PORT=${SRL_PORT:-5000}
 
 # if using public fake SRL
-export SRL_HOST=151.100.59.107
-export SRL_PORT=9890
+#export SRL_HOST=151.100.59.107
+#export SRL_PORT=9890
 
 export LSB1_PORT=5010
 export LSB2_PORT=5020
