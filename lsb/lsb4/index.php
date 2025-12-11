@@ -1,9 +1,10 @@
 <?php
 
-$SRL_SERVICE_URL = 'http://localhost:8000';
+
+$SRL_SERVICE_URL = 'http://'.getenv('SRL_HOST').':'.getenv('SRL_PORT');
 
 // Funzione helper per le chiamate API
-function safeFetchJSON($url) {
+function safeFetchJSON($url, $method = 'GET') {
     global $SRL_SERVICE_URL;
     $fullUrl = strpos($url, 'http') === 0 ? $url : $SRL_SERVICE_URL . $url;
 
@@ -11,6 +12,7 @@ function safeFetchJSON($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $fullUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method); // Setta il metodo (PUT, PATCH, GET, etc.)
     curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout di 5 secondi
     
     $response = curl_exec($ch);

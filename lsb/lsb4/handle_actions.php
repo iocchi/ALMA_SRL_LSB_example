@@ -4,7 +4,7 @@
 // ====================================================================
 
 // Configurazione del servizio SRL (deve essere accessibile dal server PHP!)
-$SRL_SERVICE_URL = 'http://localhost:8000';
+$SRL_SERVICE_URL = 'http://'.getenv('SRL_HOST').':'.getenv('SRL_PORT');
 
 // Funzione helper per ottenere l'IP VPN (come simulato in index.php)
 function getVPNIP() {
@@ -13,30 +13,43 @@ function getVPNIP() {
 }
 
 // Funzione helper per le chiamate API
-function safeApiCall($url, $method = 'GET') {
+function safeFetchJSON($url, $method = 'GET') {
     global $SRL_SERVICE_URL;
-    $fullUrl = $SRL_SERVICE_URL . $url;
+    $fullUrl = strpos($url, 'http') === 0 ? $url : $SRL_SERVICE_URL . $url;
 
+    // Utilizzo di cURL per una gestione più robusta delle richieste HTTP
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $fullUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method); // Setta il metodo (PUT, PATCH, GET, etc.)
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout di 5 secondi
     
-    // Esegui la chiamata
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError = curl_error($ch);
+    
+    if (curl_errno($ch)) {
+        error_log("cURL Error for $fullUrl: " . curl_error($ch));
+        curl_close($ch);
+        return null;
+    }
     curl_close($ch);
 
-    if ($curlError || $httpCode < 200 || $httpCode >= 300) {
-        error_log("API Call Error: URL: $fullUrl, Method: $method, HTTP Code: $httpCode, cURL Error: $curlError, Response: $response");
-        return ['success' => false, 'http_code' => $httpCode];
+    if ($httpCode !== 200) {
+        error_log("HTTP Error for $fullUrl: Code $httpCode");
+        return null;
     }
 
     $data = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("JSON Decode Error for $fullUrl: " . json_last_error_msg());
+        return null;
+    }
+    
     return ['success' => true, 'data' => $data, 'http_code' => $httpCode];
+
 }
+
+
 
 // ====================================================================
 // LOGICA DI GESTIONE DELLE AZIONI
@@ -50,21 +63,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     switch ($action) {
         case 'disconnect':
-            $result = safeApiCall("/api/user/{$vpnIp}/disconnect", 'PUT');
+            $result = safeFetchJSON("/api/user/{$vpnIp}/disconnect", 'PUT');
             if ($result['success']) {
                 $redirectStatus = 'disconnected';
             }
             break;
 
         case 'set_available':
-            $result = safeApiCall("/api/service/availability/true", 'PATCH');
+            $result = safeFetchJSON("/api/service/availability/true", 'PATCH');
             if ($result['success']) {
                 $redirectStatus = 'availability_true';
             }
             break;
 
         case 'set_unavailable':
-            $result = safeApiCall("/api/service/availability/false", 'PATCH');
+            $result = safeFetchJSON("/api/service/availability/false", 'PATCH');
             if ($result['success']) {
                 $redirectStatus = 'availability_false';
             }

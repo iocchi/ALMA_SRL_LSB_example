@@ -1,55 +1,78 @@
 services:
-  srl_service:
+
+  srl:
     build: ./srl_service
     container_name: srl_service
     ports:
-      - "${SRL_PORT:-8000}:8000" # FastAPI exposed on localhost:8000
+      - "${SRL_PORT:-5000}:5000" # FastAPI exposed on localhost:8000
     volumes:
       - ./srl_service:/app       # Mount code for live reload (dev)
     environment:
       - PYTHONUNBUFFERED=1
-    command: python main.py --host 0.0.0.0 --port ${SRL_CONNECT_PORT:-8000}
+    command: python main.py --host 0.0.0.0 --port 5000
+
 
   lsb_python:
     build: ./lsb
     container_name: lsb_python
     privileged: true
     volumes:
-      - ./lsb:/app
+      - ./lsb/lsb1:/app
     environment:
       - PYTHONUNBUFFERED=1
     ports:
-    - "${LSB_PORT:-5000}:5000"       #
+      - "${LSB1_PORT:-5010}:8000"
     depends_on:
-      - srl_service
-    command: python /app/main.py --host 0.0.0.0 --port 5000 --srl-host ${SRL_CONNECT_HOST:-srl_service} --srl-port ${SRL_CONNECT_PORT:-8000}
+      - srl
+    command: python /app/main.py --host 0.0.0.0 --port 8000 --srl-host ${SRL_HOST:-localhost} --srl-port ${SRL_PORT:-5000}
     # Uncomment if you need VPN-level networking access
     # network_mode: "host"
+
+
+  lsb_python_ws:
+    build: ./lsb
+    container_name: lsb_python_ws
+    privileged: true
+    volumes:
+      - ./lsb/lsb2:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "${LSB2_PORT:-5020}:8000"
+      - "${LSB2_WS_PORT:-5021}:8001"
+    depends_on:
+      - srl
+    command: python /app/wsapp.py --host 0.0.0.0 --port 8000 --srl-host ${SRL_HOST:-localhost} --srl-port ${SRL_PORT:-5000}
+    # Uncomment if you need VPN-level networking access
+    # network_mode: "host"
+
 
   lsb_html:
     image: python:3.12-slim
     container_name: lsb_html
     working_dir: /app
     volumes:
-      - ./lsb:/app
+      - ./lsb/lsb3:/app
     ports:
-      - "${LSB_HTTP_PORT:-5080}:5080"
+      - "${LSB3_PORT:-5030}:8000"
     depends_on:
-      - srl_service
-    command: python -m http.server ${LSB_HTTP_PORT:-5080}
+      - srl
+    command: python -m http.server 8000
+
 
   lsb_php:
     image: php:8.2-cli
     container_name: lsb_php
     working_dir: /app
     volumes:
-      - ./lsb:/app
-    network_mode: "host"
-    #ports:
-    #  - "${LSB_PHP_PORT:-5090}:5090"
-    #  - "${SRL_PORT:-8000}:8000"
+      - ./lsb/lsb4:/app
+    ports:
+      - "${LSB4_PORT:-5040}:8000"
+    environment:
+      - SRL_HOST=${SRL_HOST}
+      - SRL_PORT=${SRL_PORT}
     depends_on:
-      - srl_service
-    command: php -S 0.0.0.0:${LSB_PHP_PORT:-5090}
-    
+      - srl
+    command: php -S 0.0.0.0:8000
+
 

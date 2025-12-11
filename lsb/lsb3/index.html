@@ -64,7 +64,7 @@
     <script>
         // Browser-facing SRL service base URL (static file should use localhost)
 
-        var SRL_SERVICE_URL = 'http://localhost:8000';   // accesso server locale
+        var SRL_SERVICE_URL = 'http://localhost:5000';   // accesso server locale
 
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -95,17 +95,7 @@
 
 
         async function getVPNIP() {
-            try {
-                const data = await safeFetchJSON(SRL_SERVICE_URL + '/api/service/myip');
-
-                console.log("Client VPN IP obtained: " + data.vpn_ip);
-                return data.vpn_ip;
-
-            } catch (error) {
-                console.warn("VPN IP service failed:", error);
-                return "0.0.0.0"
-            }
-            
+            return "0.0.0.0"
         }
 
         // Function to fetch and display the client's IP address
@@ -298,22 +288,6 @@
             Plotly.update('pie-chart', { values: [[data.categories.A, data.categories.B, data.categories.C]] });
         }
 
-        // Try to connect to socket.io server at localhost:5000 (where the python version ran).
-        let socket = null;
-        let socketConnected = false;
-        function tryConnectSocket() {
-            try {
-                socket = io('http://localhost:5000', { transports: ['websocket', 'polling'] });
-                socket.on('connect', () => { socketConnected = true; console.log('Connected to socket server'); });
-                socket.on('new_data', (d) => { handleNewData(d); });
-                socket.on('disconnect', () => { socketConnected = false; console.warn('Socket disconnected'); });
-            } catch (e) {
-                console.warn('Socket.io connect failed', e);
-                socket = null; socketConnected = false;
-            }
-        }
-
-        // If no socket server is available, simulate data client-side
         let simInterval = null;
         let simT = 0;
         let simAmplitude = parseFloat(document.getElementById('amplitude').value) || 1.0;
@@ -340,15 +314,7 @@
         (async function init() {
             // Fetch initial data from SRL service
             fetchUserData(); fetchWaitingUsers(); fetchInLabUsers(); fetchBookings();
-
-            // Attempt socket connection; if not connected after 1000ms, start simulation
-            tryConnectSocket();
-            setTimeout(() => {
-                if (!socketConnected) {
-                    console.log('No socket server found — falling back to simulated data');
-                    startSimulatedEmitter();
-                }
-            }, 1000);
+            startSimulatedEmitter();
         })();
     </script>
 </body>

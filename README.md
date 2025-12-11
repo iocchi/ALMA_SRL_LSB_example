@@ -12,7 +12,6 @@ I servizi offerti da SRL a LSB sono esposti mediante il protocollo HTTP (metodi 
 
 - **GET** `/api/user/by-ip/{vpn_ip}` : dati dell'utente connesso con VPN IP specificato
 - **PUT** `/api/user/{vpn_ip}/disconnect` : segnale di chiusura della connessione dell'utente con VPN IP specificato
-- **GET** `/api/service/myip` : lista delle prenotazioni del Lab
 - **GET** `/api/service/inlab` : lista degli utenti attualmente nel Lab
 - **GET** `/api/service/waiting` : lista degli utenti in attesa di entrare in Lab
 - **GET** `/api/service/bookings` : lista delle prenotazioni del Lab

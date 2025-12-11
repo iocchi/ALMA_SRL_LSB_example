@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LSB Minimal WebSocket Dashboard</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 20px; background: #f8f9fa; color: #343a40; }
+        h1 { text-align: center; color: #007bff; margin-bottom: 20px; }
+        .card { 
+            margin: 15px auto; 
+            padding: 20px; 
+            background: #ffffff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 900px;
+        }
+        .section-header {
+            font-size: 1.5em;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .user-actions {
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            font-weight: bold;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #disconnect-btn { background: #dc3545; }
+        #set-available-btn { background: #28a745; }
+        #set-unavailable-btn { background: #ffc107; }
+        .data-list ul { list-style: none; padding: 0; }
+        .data-list li { 
+            padding: 12px; 
+            margin: 8px 0; 
+            border-radius: 6px; 
+            background: #f1f4f8; 
+            font-size: 0.9em;
+            word-wrap: break-word;
+        }
+        .list-blue { border-left: 4px solid #007bff; }
+        .list-green { border-left: 4px solid #28a745; }
+        .list-yellow { border-left: 4px solid #ffc107; }
+
+        @media (max-width: 600px) {
+            .card { padding: 15px; }
+            .user-actions button { width: 100%; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔬 LSB Dashboard (Python WebSocket)</h1>
+
+    <div id="user-data" class="card">
+        <!-- I dati iniziali verranno iniettati qui dal server Python -->
+        <div id="user-info" style="text-align: center;">Loading user data... <!-- USER_INFO_PLACEHOLDER --></div>
+        
+        <div class="user-actions">
+            <button id="disconnect-btn" data-action="disconnect">
+                🔌 Esci dal Lab
+            </button>
+            <button id="set-available-btn" data-action="set_available">
+                ✅ Lab Disponibile
+            </button>
+            <button id="set-unavailable-btn" data-action="set_unavailable">
+                ⛔ Lab Non Disponibile
+            </button>
+        </div>
+        <div id="status-message" style="margin-top: 15px; text-align: center; font-weight: bold;">
+            Tentativo di connessione al backend...
+        </div>
+    </div>
+
+
+    <br><br><br>
+
+    <h1 align="center">Your Lab Here</h1>
+    
+    <br><br><br>
+
+
+    <!-- Sezioni dati aggiornate via WebSocket -->
+    <div id="inlab-users-section" class="card data-list">
+        <div class="section-header">✅ Utenti nel Lab</div>
+        <div id="inlab-users-list">Caricamento...</div>
+    </div>
+
+    <div id="waiting-users-section" class="card data-list">
+        <div class="section-header">👥 Utenti in attesa</div>
+        <div id="waiting-users-list">Caricamento...</div>
+    </div>
+
+    <div id="bookings-section" class="card data-list">
+        <div class="section-header">📅 Prenotazioni del Lab</div>
+        <div id="bookings-list">Caricamento...</div>
+    </div>
+
+    <script>
+        const WEBSOCKET_URL = 'ws://localhost:5021';
+        let ws = null;
+        const statusMessage = document.getElementById('status-message');
+
+        // --- Funzioni di Rendering HTML ---
+
+        function renderUser(u) {
+            return `
+                <h2 style="margin: 10px 0;">Ciao ${u.first_name || ''} ${u.last_name || ''}!</h2>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;"> 
+                    <span><strong>Email:</strong> ${u.email || ''}</span>
+                    <span><strong>Matricola:</strong> ${u.matricola || ''}</span>
+                    <span><strong>Ruolo:</strong> ${u.role || ''}</span>
+                    <span><strong>Stato:</strong> ${u.status || ''}</span>
+                    <span><strong>IP:</strong> ${u.vpn_ip || ''}</span>
+                    ${u.booking_end_time ? `<span><strong>La connessione sarà attiva fino a:</strong> ${u.booking_end_time}</span>` : ''}
+                </div>
+            `;
+        }
+
+        function renderUsersList(users, colorClass, accessTimeField) {
+            if (!users || users.length === 0) {
+                return '<p style="color:#6c757d; text-align:center;">Nessun utente trovato.</p>';
+            }
+            const items = users.map(u => {
+                const timeInfo = u[accessTimeField] ? `<br> Accesso da/Attesa da: ${u[accessTimeField]}` : '';
+                return `<li class="${colorClass}"> 
+                    <strong>${u.first_name || ''} ${u.last_name || ''}</strong> &nbsp;&nbsp; Matricola: ${u.matricola || ''} &nbsp;&nbsp; E-mail: ${u.email || ''} &nbsp;&nbsp; Ruolo: ${u.role || ''} ${timeInfo}
+                </li>`;
+            }).join('');
+            return `<ul>${items}</ul>`;
+        }
+
+        function renderBookings(bookings) {
+            if (!bookings || bookings.length === 0) {
+                return '<p style="color:#6c757d; text-align:center;">Nessuna prenotazione trovata.</p>';
+            }
+            const items = bookings.map(b => {
+                const status = b.status || 'unknown';
+                let colorClass = 'list-yellow';
+                if (status === 'confirmed') colorClass = 'list-green';
+                if (status === 'expired') colorClass = 'list-red'; // Definire .list-red se necessario
+                
+                const endTime = b.end_time ? ` - ${b.end_time}` : '';
+                return `<li class="${colorClass}"> 
+                    📅 ${b.start_time || ''}${endTime} &nbsp;&nbsp; <strong>Booking ID: ${b.id || ''}</strong> &nbsp;&nbsp; Stato: <span style="font-weight:bold;">${status}</span>
+                </li>`;
+            }).join('');
+            return `<ul>${items}</ul>`;
+        }
+        
+        // --- Gestione WebSocket ---
+
+        function connectWebSocket() {
+            if (ws) { ws.close(); }
+            ws = new WebSocket(WEBSOCKET_URL);
+
+            ws.onopen = () => {
+                console.log('Connesso al server WebSocket Python.');
+                statusMessage.innerHTML = '<p style="color:#28a745;font-weight:bold;">✅ Connessione WebSocket attiva. Aggiornamento dati...</p>';
+                // RICHIESTA INIZIALE di tutti i dati statici subito dopo la connessione
+                ws.send(JSON.stringify({ action: 'fetch_all_data' }));
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleIncomingMessage(data);
+                } catch (e) {
+                    console.error('Errore parsing JSON:', e);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('Errore WebSocket:', error);
+                statusMessage.innerHTML = '<p style="color:red;font-weight:bold;">❌ Errore connessione WebSocket</p>';
+            };
+
+            ws.onclose = () => {
+                console.warn('WebSocket disconnesso.');
+                statusMessage.innerHTML = '<p style="color:#ffc107;font-weight:bold;">⚠️ WebSocket disconnesso.</p>';
+                // setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        function handleIncomingMessage(data) {
+            if (data.type === 'full_update') {
+                // Aggiornamento completo dei dati statici
+                const context = data.context;
+                console.log('Ricevuto full update:', context);
+
+                // 1. Dati Utente (potrebbe essere già pre-renderizzato da Python)
+                if (context.user && context.user.user) {
+                    document.getElementById('user-info').innerHTML = renderUser(context.user.user);
+                }
+
+                // 2. Utenti in Lab
+                document.getElementById('inlab-users-list').innerHTML = renderUsersList(context.inlab, 'list-green', 'lsb_access_timestamp');
+
+                // 3. Utenti in Attesa
+                document.getElementById('waiting-users-list').innerHTML = renderUsersList(context.waiting, 'list-blue', 'waiting_since');
+
+                // 4. Prenotazioni
+                document.getElementById('bookings-list').innerHTML = renderBookings(context.bookings);
+
+                statusMessage.innerHTML = '<p style="color:#28a745;font-weight:bold;">✅ Dati aggiornati in tempo reale.</p>';
+            } else if (data.type === 'action_result') {
+                // Risultato di un'azione utente (es. Disconnect)
+                const actionStatusDiv = document.getElementById('status-message');
+                if (data.status === 'success') {
+                    actionStatusDiv.innerHTML = `<p style="color:#28a745;font-weight:bold;">✅ Azione '${data.action}' completata! Aggiorno i dati...</p>`;
+                    // Richiedi un aggiornamento completo dopo un'azione riuscita
+                    ws.send(JSON.stringify({ action: 'fetch_all_data' }));
+                } else {
+                    actionStatusDiv.innerHTML = `<p style="color:red;font-weight:bold;">❌ Errore nell'azione '${data.action}': ${data.message || 'Errore sconosciuto'}</p>`;
+                }
+            }
+        }
+        
+        // --- Gestione Bottoni ---
+
+        function setupButtonListeners() {
+            document.querySelectorAll('#user-data button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const action = e.currentTarget.getAttribute('data-action');
+                    if (!action || ws.readyState !== WebSocket.OPEN) {
+                        statusMessage.innerHTML = '<p style="color:#ffc107;font-weight:bold;">⚠️ Connessione non attiva. Attendere...</p>';
+                        return;
+                    }
+
+                    statusMessage.innerHTML = `<p style="color:#007bff;font-weight:bold;">Inviando richiesta per '${action}'...</p>`;
+                    
+                    // Invia l'azione direttamente al backend Python tramite WebSocket
+                    ws.send(JSON.stringify({ action: action }));
+                });
+            });
+        }
+
+        // --- Inizializzazione ---
+
+        (function init() {
+            connectWebSocket();
+            setupButtonListeners();
+        })();
+    </script>
+</body>
+</html>
+
