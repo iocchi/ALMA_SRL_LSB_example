@@ -13,7 +13,6 @@ wg_if = 'wg0'           # Wire>Guard interface
 check_interval = 30     # Check intervale [sec]
 timeout_disconnect = 60 # Inactivity threhold [sec]
 
-
 def inlab():
     url = f"api/service/inlab"
     method='GET'
@@ -31,13 +30,13 @@ def disconnect(client_ip):
     url = f"api/user/{client_ip}/disconnect"
     method='PUT'
     try:
-        print(f"{method} {SRL_SERVICE}/{url}")
+        # print(f"{method} {SRL_SERVICE}/{url}")
         response = requests.request(method, f"{SRL_SERVICE}/{url}", timeout=5)
         if response.status_code == 200:
             return response.json()
-        print(f"API Error fetching {url}: Status {response.status_code}")
+        print(f"ERROR API Error fetching {url}: Status {response.status_code}")
     except requests.exceptions.RequestException as e:
-        print(f"Request failed for {url}: {e}")
+        print(f"ERROR Request failed for {url}: {e}")
     return None
 
 # global
@@ -89,7 +88,7 @@ try:
                 #print(f"User in lab {uid} {client_ip}")
                 if client_ip not in clients.keys():
                     clients[client_ip] = time.time()
-                    print(f"[{ts}] New user in lab {uid} {client_ip} {clients[client_ip]}")
+                    print(f"[{ts}] New user in lab {uid} {client_ip}")
 
 
 
@@ -103,7 +102,30 @@ try:
 
         for c in to_disconnect:
             r = disconnect(c)
-            del clients[c]
+            if r is None:
+                print(f"[{ts}] Disconnect {c} failed.")
+                
+                # check users in lab
+                uinlab = False
+                if users_in_lab is None:
+                    uinlab = True  # we don't know yet, let's try again later
+                else:
+                    for user in users_in_lab:
+                        uid = user['id']
+                        client_ip = user['vpn_ip']
+                        if client_ip == c:
+                            uinlab = True
+
+                if uinlab:
+                    print("    User still in lab, trying to disconnect later.")
+                else:
+                    print("    User not in lab, deleted from the monitor list.")
+                    del clients[c]
+
+
+            else:
+                print(f"[{ts}] Client {c} disconnected.")
+                del clients[c]
 
         sys.stdout.flush()
 
