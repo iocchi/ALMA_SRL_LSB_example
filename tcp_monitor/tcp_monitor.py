@@ -6,11 +6,12 @@ import sys
 
 SRL_SERVICE = 'http://10.96.0.2:5000'
 
-lsb_ip = '10.112.0.9'
-lsb_port = 9880
+lsb_ip = '10.112.0.9'   # Lab VPN IP = IP of the machine running this program
+lsb_port = 9880         # Lab VPN port = port on which the LSB is running
+wg_if = 'wg0'           # Wire>Guard interface
 
-check_interval = 30 # sec
-timeout_disconnect = 60 # sec
+check_interval = 30     # Check intervale [sec]
+timeout_disconnect = 60 # Inactivity threhold [sec]
 
 
 def inlab():
@@ -48,7 +49,7 @@ def tcp_listen():
     global last_timestamp, first
     #filter_expr = f"src host {lsb_ip} and src port {lsb_port} and dst host {client_ip}"
     filter_expr = f"src host {lsb_ip} and src port {lsb_port}"
-    p = sub.Popen(('sudo', 'tcpdump', '-i', 'wg0', '-n', '-l', filter_expr),
+    p = sub.Popen(('sudo', 'tcpdump', '-i', wg_if, '-n', '-l', filter_expr),
             stdout=sub.PIPE)
     for l in iter(p.stdout.readline, b''):
         l = l.strip().decode('utf-8')
